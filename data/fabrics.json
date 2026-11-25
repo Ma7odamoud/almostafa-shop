@@ -1,0 +1,242 @@
+[
+  {
+    "id": "fab-001",
+    "nameAr": "صوف ميرينو كحلي",
+    "nameEn": "Navy Merino Wool",
+    "descriptionAr": "⚠️ نموذج تجريبي — يرجى إضافة الوصف الحقيقي. قماش صوفي ناعم بلون كحلي غامق، مثالي للبدلات الرسمية.",
+    "descriptionEn": "⚠️ DEMO — replace with real description. A fine navy merino wool, ideal for formal suits.",
+    "pricePerMeter": 0,
+    "stockMeters": 0,
+    "color": "navy",
+    "colorLabel": {
+      "ar": "كحلي",
+      "en": "Navy"
+    },
+    "material": "wool",
+    "materialLabel": {
+      "ar": "صوف",
+      "en": "Wool"
+    },
+    "pattern": "plain",
+    "patternLabel": {
+      "ar": "سادة",
+      "en": "Plain"
+    },
+    "category": "suit",
+    "categoryLabel": {
+      "ar": "بدلة",
+      "en": "Suit"
+    },
+    "photos": [
+      {
+        "src": "/demo/fabric-draped-placeholder.svg",
+        "alt": "Navy merino wool draped"
+      },
+      {
+        "src": "/demo/fabric-mannequin-placeholder.svg",
+        "alt": "Navy merino wool on mannequin"
+      }
+    ],
+    "hidden": false
+  },
+  {
+    "id": "fab-002",
+    "nameAr": "تويد رمادي للجاكيت",
+    "nameEn": "Grey Tweed Jacket Fabric",
+    "descriptionAr": "⚠️ نموذج تجريبي — يرجى إضافة الوصف الحقيقي. تويد رمادي كلاسيكي لجاكيت ريفي أنيق.",
+    "descriptionEn": "⚠️ DEMO — replace with real description. Classic grey tweed for a refined country jacket.",
+    "pricePerMeter": 0,
+    "stockMeters": 0,
+    "color": "grey",
+    "colorLabel": {
+      "ar": "رمادي",
+      "en": "Grey"
+    },
+    "material": "wool",
+    "materialLabel": {
+      "ar": "صوف",
+      "en": "Wool"
+    },
+    "pattern": "other",
+    "patternLabel": {
+      "ar": "أنماط أخرى",
+      "en": "Other Patterns"
+    },
+    "category": "jacket",
+    "categoryLabel": {
+      "ar": "جاكيت",
+      "en": "Jacket"
+    },
+    "photos": [
+      {
+        "src": "/demo/fabric-draped-placeholder.svg",
+        "alt": "Grey tweed draped"
+      },
+      {
+        "src": "/demo/fabric-mannequin-placeholder.svg",
+        "alt": "Grey tweed on mannequin"
+      }
+    ],
+    "hidden": false
+  },
+  {
+    "id": "fab-003",
+    "nameAr": "كتان بيج للبنطلون",
+    "nameEn": "Beige Linen Trouser Fabric",
+    "descriptionAr": "⚠️ نموذج تجريبي — يرجى إضافة الوصف الحقيقي. كتان خفيف بيج للبناطيل الصيفية.",
+    "descriptionEn": "⚠️ DEMO — replace with real description. Light beige linen, ideal for summer trousers.",
+    "pricePerMeter": 0,
+    "stockMeters": 0,
+    "color": "beige",
+    "colorLabel": {
+      "ar": "بيج",
+      "en": "Beige"
+    },
+    "material": "linen",
+    "materialLabel": {
+      "ar": "كتان",
+      "en": "Linen"
+    },
+    "pattern": "plain",
+    "patternLabel": {
+      "ar": "سادة",
+      "en": "Plain"
+    },
+    "category": "trousers",
+    "categoryLabel": {
+      "ar": "بنطلون",
+      "en": "Trousers"
+    },
+    "photos": [
+      {
+        "src": "/demo/fabric-draped-placeholder.svg",
+        "alt": "Beige linen draped"
+      },
+      {
+        "src": "/demo/fabric-mannequin-placeholder.svg",
+        "alt": "Beige linen on mannequin"
+      }
+    ],
+    "hidden": false
+  },
+  {
+    "id": "fab-004",
+    "nameAr": "صوف كاشمير للمعطف",
+    "nameEn": "Cashmere Coat Wool",
+    "descriptionAr": "⚠️ نموذج تجريبي — يرجى إضافة الوصف الحقيقي. كاشمير فاخر لمعطف شتوي دافئ.",
+    "descriptionEn": "⚠️ DEMO — replace with real description. Luxurious cashmere for a warm winter overcoat.",
+    "pricePerMeter": 0,
+    "stockMeters": 0,
+    "color": "camel",
+    "colorLabel": {
+      "ar": "كامل",
+      "en": "Camel"
+    },
+    "material": "cashmere",
+    "materialLabel": {
+      "ar": "كاشمير",
+      "en": "Cashmere"
+    },
+    "pattern": "plain",
+    "patternLabel": {
+      "ar": "سادة",
+      "en": "Plain"
+    },
+    "category": "coat",
+    "categoryLabel": {
+      "ar": "معطف",
+      "en": "Coat"
+    },
+    "photos": [
+      {
+        "src": "/demo/fabric-draped-placeholder.svg",
+        "alt": "Camel cashmere draped"
+      },
+      {
+        "src": "/demo/fabric-mannequin-placeholder.svg",
+        "alt": "Camel cashmere on mannequin"
+      }
+    ],
+    "hidden": false
+  },
+  {
+    "id": "fab-005",
+    "nameAr": "كتان مخطط للبدلة",
+    "nameEn": "Striped Linen Suit Fabric",
+    "descriptionAr": "⚠️ نموذج تجريبي — يرجى إضافة الوصف الحقيقي. قماش كتاني بخطوط رفيعة للبدل الصيفية.",
+    "descriptionEn": "⚠️ DEMO — replace with real description. Fine striped linen for summer suits.",
+    "pricePerMeter": 0,
+    "stockMeters": 0,
+    "color": "white",
+    "colorLabel": {
+      "ar": "أبيض",
+      "en": "White"
+    },
+    "material": "linen",
+    "materialLabel": {
+      "ar": "كتان",
+      "en": "Linen"
+    },
+    "pattern": "stripes",
+    "patternLabel": {
+      "ar": "خطوط",
+      "en": "Stripes"
+    },
+    "category": "suit",
+    "categoryLabel": {
+      "ar": "بدلة",
+      "en": "Suit"
+    },
+    "photos": [
+      {
+        "src": "/demo/fabric-draped-placeholder.svg",
+        "alt": "Striped linen draped"
+      },
+      {
+        "src": "/demo/fabric-mannequin-placeholder.svg",
+        "alt": "Striped linen on mannequin"
+      }
+    ],
+    "hidden": false
+  },
+  {
+    "id": "fab-006",
+    "nameAr": "صوف مربعات للجاكيت",
+    "nameEn": "Checked Wool Jacket Fabric",
+    "descriptionAr": "⚠️ نموذج تجريبي — يرجى إضافة الوصف الحقيقي. صوف بنقوش مربعات للجاكيت الكلاسيكي.",
+    "descriptionEn": "⚠️ DEMO — replace with real description. Classic checked wool for a traditional jacket.",
+    "pricePerMeter": 0,
+    "stockMeters": 0,
+    "color": "brown",
+    "colorLabel": {
+      "ar": "بني",
+      "en": "Brown"
+    },
+    "material": "wool",
+    "materialLabel": {
+      "ar": "صوف",
+      "en": "Wool"
+    },
+    "pattern": "checks",
+    "patternLabel": {
+      "ar": "مربعات",
+      "en": "Checks"
+    },
+    "category": "jacket",
+    "categoryLabel": {
+      "ar": "جاكيت",
+      "en": "Jacket"
+    },
+    "photos": [
+      {
+        "src": "/demo/fabric-draped-placeholder.svg",
+        "alt": "Checked wool draped"
+      },
+      {
+        "src": "/demo/fabric-mannequin-placeholder.svg",
+        "alt": "Checked wool on mannequin"
+      }
+    ],
+    "hidden": false
+  }
+]

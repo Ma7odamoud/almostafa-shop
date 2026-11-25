@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a1526" />
+      <stop offset="40%" stop-color="#0e1a2e" />
+      <stop offset="100%" stop-color="#060d17" />
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#b8973e" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#b8973e" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)" />
+  <rect width="800" height="1000" fill="url(#glow)" />
+
+  <!-- Subtle bespoke tailored silhouette -->
+  <g opacity="0.45" stroke="#c9a84c" stroke-width="1.5" fill="none">
+    <!-- Suit collar & lapel silhouette -->
+    <path d="M400 240 L340 360 L385 520 L400 700 L415 520 L460 360 Z" stroke-dasharray="6 4" />
+    <!-- Lapels -->
+    <path d="M340 360 L280 430 L350 560" stroke-width="2" />
+    <path d="M460 360 L520 430 L450 560" stroke-width="2" />
+    <!-- Shoulders -->
+    <path d="M280 430 L160 480 L140 750" stroke-width="1.5" />
+    <path d="M520 430 L640 480 L660 750" stroke-width="1.5" />
+    <!-- Tie / needle line -->
+    <line x1="400" y1="260" x2="400" y2="580" stroke-width="1" stroke-dasharray="3 3" />
+    <!-- Tailor measuring tape curve -->
+    <path d="M220 540 Q400 600 580 540" stroke="#c9a84c" stroke-width="1" stroke-dasharray="8 6" opacity="0.6" />
+  </g>
+
+  <!-- Needle and thread emblem motif from logo -->
+  <g transform="translate(400, 310)" stroke="#c9a84c" fill="none">
+    <ellipse cx="0" cy="0" rx="14" ry="14" stroke-width="1" opacity="0.5" />
+    <line x1="0" y1="-28" x2="0" y2="28" stroke-width="1.5" />
+    <circle cx="0" cy="-22" r="2" fill="#c9a84c" />
+    <path d="M0 -18 Q20 -5 10 15 Q0 30 -20 20" stroke-width="1" stroke-dasharray="3 3" opacity="0.6" />
+  </g>
+
+  <!-- Notice -->
+  <text x="400" y="850" fill="#c9a84c" text-anchor="middle" font-size="16" font-family="'Tajawal', sans-serif" opacity="0.8">⚠️ صورة نموذج تجريبي — استبدلها بصورة البدل والتفصيل</text>
+  <text x="400" y="880" fill="#8fa0b8" text-anchor="middle" font-size="13" font-family="sans-serif" opacity="0.7">Place hero.jpg in /public/assets/hero/</text>
+</svg>
