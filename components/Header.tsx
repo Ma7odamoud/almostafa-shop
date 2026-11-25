@@ -12,7 +12,7 @@ import {
   MoonIcon,
   CaretLeftIcon,
   CaretRightIcon,
-  ShoppingBagIcon,
+  ConcreteShoppingBagIcon,
 } from "./Icons";
 
 export default function Header() {
@@ -320,10 +320,11 @@ export default function Header() {
               )}
             </button>
 
-            {/* Shopping bag */}
+            {/* Shopping bag (Exact Concrete.store 3D icon requested by user) */}
             <Link
               href="/cart"
               aria-label={isAr ? `سلة التسوق (${cartCount})` : `Shopping Cart (${cartCount})`}
+              title={isAr ? `سلة التسوق (${cartCount})` : `Shopping Cart (${cartCount})`}
               style={{
                 color: iconColor,
                 minWidth: 44,
@@ -332,22 +333,31 @@ export default function Header() {
                 alignItems: "center",
                 justifyContent: "center",
                 position: "relative",
-                padding: "10px",
+                padding: "8px 10px",
                 transition: "color 0.2s ease, opacity 0.2s ease",
               }}
             >
-              <div style={{ position: "relative", width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <ShoppingBagIcon size={22} />
+              <div
+                style={{
+                  position: "relative",
+                  width: 20,
+                  height: 23,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ConcreteShoppingBagIcon size={20} />
                 <span
                   style={{
                     position: "absolute",
-                    top: "7px",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    fontSize: "var(--fs-cart-count)",
-                    fontWeight: "var(--fw-cart-count)" as unknown as number,
-                    letterSpacing: "var(--ls-cart-count)",
-                    color: iconColor,
+                    top: "13px",
+                    left: "38%",
+                    transform: "translate(-50%, -50%)",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    fontFamily: "var(--font-en)",
+                    color: "var(--price)",
                     lineHeight: 1,
                     textAlign: "center",
                     pointerEvents: "none",
