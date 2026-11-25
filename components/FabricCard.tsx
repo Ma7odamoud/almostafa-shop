@@ -23,10 +23,11 @@ export default function FabricCard({ fabric }: Props) {
     <Link
       href={`/fabrics/${fabric.id}`}
       style={{ textDecoration: "none", display: "block" }}
+      className="fabric-card-link"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div className="hover-lift" style={{
+      <div className="fabric-card hover-lift" style={{
         backgroundColor: "var(--bg-card)",
         border: "1px solid var(--border)",
         borderRadius: "var(--radius-md)",

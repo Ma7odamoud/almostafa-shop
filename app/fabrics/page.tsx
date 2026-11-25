@@ -71,14 +71,6 @@ export default function FabricsPage() {
     return true;
   }), [fabrics, filters]);
 
-  // Group by category (only categories that have results)
-  const grouped = useMemo(() => {
-    return CATEGORIES.map((cat) => ({
-      ...cat,
-      fabrics: filtered.filter((f) => f.category === cat.key),
-    })).filter((g) => g.fabrics.length > 0);
-  }, [filtered]);
-
   const hasFilters = filters.colors.length + filters.patterns.length + filters.materials.length + filters.categories.length > 0;
 
   return (
@@ -137,37 +129,20 @@ export default function FabricsPage() {
             </p>
           )}
 
-          {/* Grouped sections */}
-          {grouped.map((group) => (
-            <section key={group.key} style={{ marginBottom: "3rem" }}>
-              <h2 style={{
-                color: "var(--fg)",
-                fontSize: "1.2rem",
-                fontWeight: 400,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                marginBottom: "1rem",
-                display: "flex",
-                alignItems: "center",
-                gap: "1rem",
-              }}>
-                {locale === "ar" ? group.labelAr : group.labelEn}
-                <span style={{
-                  display: "block",
-                  flex: 1,
-                  height: 1,
-                  background: "linear-gradient(to right, var(--border), transparent)",
-                }} />
-              </h2>
-              <div style={{
+          {/* Unified continuous product grid */}
+          {!loading && filtered.length > 0 && (
+            <div
+              style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
                 gap: "1.25rem",
-              }}>
-                {group.fabrics.map((f) => <FabricCard key={f.id} fabric={f} />)}
-              </div>
-            </section>
-          ))}
+              }}
+            >
+              {filtered.map((f) => (
+                <FabricCard key={f.id} fabric={f} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

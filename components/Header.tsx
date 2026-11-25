@@ -5,6 +5,15 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTheme, useLang, useCart } from "./Providers";
 import { t } from "@/lib/i18n";
+import {
+  ListIcon,
+  XIcon,
+  SunIcon,
+  MoonIcon,
+  CaretLeftIcon,
+  CaretRightIcon,
+  ShoppingBagIcon,
+} from "./Icons";
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
@@ -20,6 +29,7 @@ export default function Header() {
 
   // Is this the homepage where transparent hero header is active?
   const isHome = pathname === "/";
+  const isAr = locale === "ar";
 
   useEffect(() => {
     function handleScroll() {
@@ -93,19 +103,21 @@ export default function Header() {
             position: "relative",
           }}
         >
-          {/* In RTL (Arabic): Hamburger is at the RIGHT edge.
-              In LTR (English): Hamburger is at the LEFT edge. */}
+          {/* MENU TRIGGER:
+              In Arabic (RTL): start of flex row is the physical RIGHT edge.
+              In English (LTR): start of flex row is the physical LEFT edge.
+          */}
           <div
             className="header-menu-side"
             style={{
-              order: locale === "ar" ? 3 : 1,
               display: "flex",
               alignItems: "center",
+              zIndex: 10,
             }}
           >
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              aria-label={locale === "ar" ? "فتح القائمة" : "Open menu"}
+              aria-label={isAr ? "فتح القائمة" : "Open menu"}
               aria-expanded={menuOpen}
               style={{
                 background: "none",
@@ -118,22 +130,11 @@ export default function Header() {
                 alignItems: "center",
                 justifyContent: "center",
                 padding: "10px",
-                transition: "color 0.3s ease",
+                transition: "color 0.2s ease, opacity 0.2s ease",
+                opacity: 1,
               }}
             >
-              {/* Three equal thin horizontal lines, 20px, 1.8px stroke, rounded ends */}
-              <svg
-                width="20"
-                height="16"
-                viewBox="0 0 20 16"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ display: "block" }}
-              >
-                <line x1="1" y1="2" x2="19" y2="2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                <line x1="1" y1="8" x2="19" y2="8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                <line x1="1" y1="14" x2="19" y2="14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-              </svg>
+              <ListIcon size={24} />
             </button>
           </div>
 
@@ -141,13 +142,13 @@ export default function Header() {
           <div
             className="header-logo-container"
             style={{
-              order: 2,
               position: "absolute",
               left: "50%",
               transform: "translateX(-50%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              zIndex: 5,
             }}
           >
             <Link
@@ -171,82 +172,63 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* In RTL (Arabic): Icon group is at the LEFT edge.
-              In LTR (English): Icon group is at the RIGHT edge.
-              Order from edge inward:
-              1. Shopping bag with item count inside
-              2. Language switcher */}
+          {/* UTILITY ICONS GROUP:
+              In Arabic (RTL): end of flex row is the physical LEFT edge.
+              In English (LTR): end of flex row is the physical RIGHT edge.
+              Adjacent pair: Theme Control + Language Control, then Cart.
+          */}
           <div
             className="header-icons-side"
             style={{
-              order: locale === "ar" ? 1 : 3,
               display: "flex",
               alignItems: "center",
-              gap: "16px",
+              gap: "8px",
+              zIndex: 10,
             }}
           >
-            {/* Shopping bag */}
-            <Link
-              href="/cart"
-              aria-label={locale === "ar" ? `سلة التسوق (${cartCount})` : `Shopping Cart (${cartCount})`}
+            {/* Theme Toggle Button (Compact Sun/Moon icon in header) */}
+            <button
+              onClick={toggleTheme}
+              aria-label={
+                theme === "dark"
+                  ? isAr
+                    ? "التحويل للوضع الفاتح"
+                    : "Switch to Light Mode"
+                  : isAr
+                  ? "التحويل للوضع الداكن"
+                  : "Switch to Dark Mode"
+              }
+              title={
+                theme === "dark"
+                  ? isAr
+                    ? "التحويل للوضع الفاتح"
+                    : "Switch to Light Mode"
+                  : isAr
+                  ? "التحويل للوضع الداكن"
+                  : "Switch to Dark Mode"
+              }
               style={{
+                background: "none",
+                border: "none",
                 color: iconColor,
+                cursor: "pointer",
                 minWidth: 44,
                 minHeight: 44,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                position: "relative",
-                transition: "color 0.3s ease",
+                padding: "10px",
+                transition: "color 0.2s ease, opacity 0.2s ease",
               }}
             >
-              <div style={{ position: "relative", width: 20, height: 23 }}>
-                <svg
-                  width="20"
-                  height="23"
-                  viewBox="0 0 20 23"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  style={{ display: "block" }}
-                >
-                  <path
-                    d="M6 7V5C6 2.79086 7.79086 1 10 1C12.2091 1 14 2.79086 14 5V7"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M1.5 7H18.5L17.2 21.2C17.05 21.65 16.65 22 16.15 22H3.85C3.35 22 2.95 21.65 2.8 21.2L1.5 7Z"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+              {theme === "dark" ? <SunIcon size={21} /> : <MoonIcon size={21} />}
+            </button>
 
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "10px",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    fontSize: "var(--fs-cart-count)",
-                    fontWeight: "var(--fw-cart-count)" as unknown as number,
-                    letterSpacing: "var(--ls-cart-count)",
-                    color: iconColor,
-                    lineHeight: 1,
-                    textAlign: "center",
-                    pointerEvents: "none",
-                  }}
-                >
-                  {cartCount > 99 ? "99+" : cartCount}
-                </span>
-              </div>
-            </Link>
-
-            {/* Language Switcher */}
+            {/* Language Switcher (Directly adjacent to Theme toggle) */}
             <button
               onClick={toggleLocale}
-              aria-label={locale === "ar" ? "Switch to English" : "التحويل للغة العربية"}
+              aria-label={isAr ? "Switch to English" : "التحويل للغة العربية"}
+              title={isAr ? "Switch to English" : "التحويل للغة العربية"}
               style={{
                 background: "none",
                 border: "none",
@@ -258,11 +240,11 @@ export default function Header() {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "4px 8px",
-                transition: "color 0.3s ease",
+                padding: "4px 6px",
+                transition: "color 0.2s ease, opacity 0.2s ease",
               }}
             >
-              {locale === "ar" ? (
+              {isAr ? (
                 <>
                   <div
                     style={{
@@ -292,7 +274,7 @@ export default function Header() {
                       fontSize: "var(--fs-micro)",
                       fontWeight: "var(--fw-micro)" as unknown as number,
                       lineHeight: "var(--lh-micro)",
-                      marginTop: 3,
+                      marginTop: 2,
                       fontFamily: "var(--font-en)",
                       color: iconColor,
                     }}
@@ -329,7 +311,7 @@ export default function Header() {
                       fontSize: "var(--fs-micro)",
                       fontWeight: "var(--fw-micro)" as unknown as number,
                       lineHeight: "var(--lh-micro)",
-                      marginTop: 3,
+                      marginTop: 2,
                       fontFamily: "var(--font-ar)",
                       color: iconColor,
                     }}
@@ -339,6 +321,44 @@ export default function Header() {
                 </>
               )}
             </button>
+
+            {/* Shopping bag */}
+            <Link
+              href="/cart"
+              aria-label={isAr ? `سلة التسوق (${cartCount})` : `Shopping Cart (${cartCount})`}
+              style={{
+                color: iconColor,
+                minWidth: 44,
+                minHeight: 44,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
+                padding: "10px",
+                transition: "color 0.2s ease, opacity 0.2s ease",
+              }}
+            >
+              <div style={{ position: "relative", width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <ShoppingBagIcon size={22} />
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "7px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    fontSize: "var(--fs-cart-count)",
+                    fontWeight: "var(--fw-cart-count)" as unknown as number,
+                    letterSpacing: "var(--ls-cart-count)",
+                    color: iconColor,
+                    lineHeight: 1,
+                    textAlign: "center",
+                    pointerEvents: "none",
+                  }}
+                >
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              </div>
+            </Link>
           </div>
         </div>
       </header>
@@ -348,39 +368,47 @@ export default function Header() {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={locale === "ar" ? "قائمة التصفح" : "Navigation menu"}
+          aria-label={isAr ? "قائمة التصفح" : "Navigation menu"}
           style={{
             position: "fixed",
             inset: 0,
             zIndex: 2000,
-            display: "flex",
           }}
         >
+          {/* Backdrop overlay */}
           <div
             onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
             style={{
               position: "absolute",
               inset: 0,
               backgroundColor: "rgba(0,0,0,0.55)",
               backdropFilter: "blur(4px)",
-              transition: "opacity 0.3s ease",
+              transition: "opacity 0.28s ease",
             }}
           />
 
+          {/* Drawer panel with explicit anchoring for Arabic (Right) vs English (Left) */}
           <div
+            className={`menu-drawer-panel ${isAr ? "drawer-ar" : "drawer-en"}`}
             style={{
-              position: "relative",
-              marginInlineStart: "auto",
+              position: "fixed",
+              top: 0,
+              bottom: 0,
+              right: isAr ? 0 : "auto",
+              left: isAr ? "auto" : 0,
               width: "min(340px, 85vw)",
               height: "100%",
               backgroundColor: "var(--bg)",
-              borderInlineStart: "1px solid var(--border)",
-              boxShadow: "0 0 40px rgba(0,0,0,0.4)",
+              borderLeft: isAr ? "1px solid var(--border)" : "none",
+              borderRight: !isAr ? "1px solid var(--border)" : "none",
+              boxShadow: isAr
+                ? "-10px 0 40px rgba(0,0,0,0.4)"
+                : "10px 0 40px rgba(0,0,0,0.4)",
               display: "flex",
               flexDirection: "column",
               padding: "24px 20px",
               zIndex: 2001,
-              animation: "slideInDrawer 0.3s ease both",
             }}
           >
             {/* Drawer Header with Close Button */}
@@ -403,12 +431,12 @@ export default function Header() {
                 }}
                 className="uppercase-en"
               >
-                {locale === "ar" ? "المصطفى" : "Al-Mostafa"}
+                {isAr ? "المصطفى" : "Al-Mostafa"}
               </span>
 
               <button
                 onClick={() => setMenuOpen(false)}
-                aria-label={locale === "ar" ? "إغلاق القائمة" : "Close menu"}
+                aria-label={isAr ? "إغلاق القائمة" : "Close menu"}
                 style={{
                   background: "none",
                   border: "none",
@@ -419,10 +447,12 @@ export default function Header() {
                   alignItems: "center",
                   justifyContent: "center",
                   cursor: "pointer",
-                  fontSize: "1.4rem",
+                  padding: "10px",
+                  opacity: 0.85,
+                  transition: "opacity 0.2s ease",
                 }}
               >
-                ✕
+                <XIcon size={20} />
               </button>
             </div>
 
@@ -454,78 +484,18 @@ export default function Header() {
                       minHeight: 48,
                       border: active ? "1px solid var(--border)" : "1px solid transparent",
                       transition: "background-color 0.2s ease, color 0.2s ease",
+                      textAlign: isAr ? "right" : "left",
                     }}
                     className="uppercase-en"
                   >
                     <span>{label}</span>
-                    <span style={{ opacity: 0.6 }}>{locale === "ar" ? "←" : "→"}</span>
+                    <span style={{ display: "flex", alignItems: "center", opacity: 0.7 }}>
+                      {isAr ? <CaretLeftIcon size={16} /> : <CaretRightIcon size={16} />}
+                    </span>
                   </Link>
                 );
               })}
             </nav>
-
-            {/* Theme Toggle (in the menu) */}
-            <div
-              style={{
-                borderTop: "1px solid var(--border)",
-                paddingTop: "16px",
-                marginTop: "auto",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: "8px",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "var(--fs-notice)",
-                    color: "var(--fg-muted)",
-                  }}
-                >
-                  {locale === "ar" ? "المظهر" : "Theme"}
-                </span>
-                <span style={{ fontSize: "0.85rem", color: "var(--price)" }}>
-                  {theme === "dark" ? (locale === "ar" ? "الوضع الداكن" : "Dark Mode") : (locale === "ar" ? "الوضع الفاتح" : "Light Mode")}
-                </span>
-              </div>
-
-              <button
-                onClick={toggleTheme}
-                style={{
-                  width: "100%",
-                  minHeight: 46,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                  background: "var(--btn-bg)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "var(--radius-sm)",
-                  color: "var(--btn-fg)",
-                  cursor: "pointer",
-                  fontSize: "var(--fs-btn-sm)",
-                  fontWeight: 600,
-                  transition: "opacity 0.2s ease",
-                }}
-                className="uppercase-en"
-              >
-                {theme === "dark" ? (
-                  <>
-                    <span>☀️</span>
-                    <span>{locale === "ar" ? "التحويل للوضع الفاتح" : "Switch to Light Mode"}</span>
-                  </>
-                ) : (
-                  <>
-                    <span>🌙</span>
-                    <span>{locale === "ar" ? "التحويل للوضع الداكن" : "Switch to Dark Mode"}</span>
-                  </>
-                )}
-              </button>
-            </div>
           </div>
         </div>
       )}
@@ -550,9 +520,28 @@ export default function Header() {
           }
         }
 
-        @keyframes slideInDrawer {
+        /* Language-aware explicit slide-in animations */
+        .drawer-ar {
+          animation: slideInDrawerAr 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        .drawer-en {
+          animation: slideInDrawerEn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes slideInDrawerAr {
           from {
-            transform: ${locale === "ar" ? "translateX(100%)" : "translateX(-100%)"};
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideInDrawerEn {
+          from {
+            transform: translateX(-100%);
             opacity: 0;
           }
           to {
