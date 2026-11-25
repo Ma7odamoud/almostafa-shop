@@ -62,14 +62,11 @@ export default function Header() {
   }, [menuOpen]);
 
   // Header appearance states
-  const isTransparent = isHome && !scrolled;
-
-  // Background and border styles connected to olive palette
-  const headerBg = isTransparent ? "transparent" : "var(--bg)";
-  const headerBorder = isTransparent ? "1px solid transparent" : "1px solid var(--border-subtle)";
-
-  // Icon color: high-contrast ivory over dark hero, theme fg when solid
-  const iconColor = isTransparent ? "#EFEEEC" : "var(--fg)";
+  // Coherent theme background and foreground in BOTH top (scrollY = 0) and scrolled states
+  // Eliminates white flash, disappearing controls, and scroll-dependent contrast failure
+  const headerBg = "var(--bg)";
+  const headerBorder = "1px solid var(--border-subtle)";
+  const iconColor = "var(--fg)";
 
   // Logo for both light and dark themes as supplied
   const logoSrc = "/logo.png";
@@ -89,7 +86,8 @@ export default function Header() {
           width: "100%",
           backgroundColor: headerBg,
           borderBottom: headerBorder,
-          transition: "background-color 0.3s ease, border-color 0.3s ease",
+          boxShadow: scrolled ? "0 2px 10px rgba(0, 0, 0, 0.08)" : "none",
+          transition: "box-shadow 0.2s ease, background-color var(--transition-base), border-color var(--transition-base)",
         }}
       >
         <div
