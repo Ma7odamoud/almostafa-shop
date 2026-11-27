@@ -74,7 +74,7 @@ export default function HomePage() {
           paddingLeft: "20px",
           paddingRight: "20px",
           overflow: "hidden",
-          backgroundColor: "#10100F",
+          backgroundColor: "#060910",
         }}
       >
         {/* Full-bleed hero image background with fallback pattern */}
@@ -90,14 +90,14 @@ export default function HomePage() {
           }}
         />
 
-        {/* Warm obsidian gradient overlay adapted to the palette */}
+        {/* Blue-Black gradient overlay adapted to the palette */}
         <div
           style={{
             position: "absolute",
             inset: 0,
             zIndex: 2,
             background:
-              "linear-gradient(180deg, rgba(16,16,15,0.35) 0%, rgba(20,20,19,0.65) 45%, rgba(20,20,19,0.93) 80%, rgba(20,20,19,0.99) 100%)",
+              "linear-gradient(180deg, rgba(6,9,16,0.35) 0%, rgba(8,12,20,0.65) 45%, rgba(8,12,20,0.93) 80%, rgba(8,12,20,0.99) 100%)",
             pointerEvents: "none",
           }}
         />
