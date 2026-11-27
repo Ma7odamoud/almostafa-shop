@@ -77,7 +77,7 @@ export default function FabricCard({ fabric }: Props) {
             <Tag>{locale === "ar" ? fabric.materialLabel.ar : fabric.materialLabel.en}</Tag>
             <Tag>{locale === "ar" ? fabric.patternLabel.ar : fabric.patternLabel.en}</Tag>
           </div>
-          <p style={{ color: hasPrice ? "var(--price)" : "var(--color-warning)", fontSize: "0.9rem", fontWeight: 400 }}>
+          <p style={{ color: "var(--price)", fontSize: "0.9rem", fontWeight: 400 }}>
             {hasPrice
               ? `${fabric.pricePerMeter.toFixed(2)} — ${t(locale, "pricePerMeter")}`
               : t(locale, "demoPrice")}

@@ -83,7 +83,25 @@ export default function Footer() {
 
         <div className="divider-gold" style={{ margin: "1rem 0" }} />
 
-        {/* Copyright */}
+        {/* Contact Email & Copyright */}
+        <p
+          style={{
+            textAlign: "center",
+            color: "var(--fg-muted)",
+            fontSize: "var(--fs-notice)",
+            lineHeight: "var(--lh-notice)",
+            fontWeight: "var(--fw-notice)" as unknown as number,
+            marginBottom: "0.4rem",
+          }}
+        >
+          <a
+            href="mailto:contactalmostafainfo@gmail.com"
+            style={{ color: "var(--fg)", textDecoration: "none" }}
+          >
+            contactalmostafainfo@gmail.com
+          </a>
+        </p>
+
         <p
           style={{
             textAlign: "center",

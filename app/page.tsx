@@ -9,15 +9,18 @@ import type { Fabric } from "@/lib/demoData";
 // STORE SETTINGS — Single source of truth for visit section
 // ============================================================
 export const STORE_SETTINGS = {
-  ADDRESS: "[Al MOSTAFA address, Downtown Cairo, to be provided]",
-  HOURS: "[to be provided]",
-  PHONE: "[to be provided]",
-  MAP_LINK: "[to be provided]",
+  ADDRESS_AR: "وسط البلد، القاهرة، مصر",
+  ADDRESS_EN: "Downtown Cairo, Egypt",
+  HOURS_AR: "السبت – الخميس: 10:00 ص – 10:00 م",
+  HOURS_EN: "Sat – Thu: 10:00 AM – 10:00 PM",
+  EMAIL: "contactalmostafainfo@gmail.com",
+  PHONE: "",
+  MAP_LINK: "",
 };
 
 function hasRealValue(val?: string): boolean {
   if (!val) return false;
-  return !val.includes("[to be provided]") && !val.includes("to be provided");
+  return val.trim().length > 0 && !val.includes("[to be provided]") && !val.includes("to be provided");
 }
 
 export default function HomePage() {
@@ -353,14 +356,14 @@ export default function HomePage() {
                       alignItems: "center",
                       justifyContent: "center",
                       marginBottom: "10px",
-                      color: "var(--color-warning)",
+                      color: "var(--fg-muted)",
                       fontSize: "0.85rem",
                     }}
                   >
-                    ⚠️ {t(locale, "demoNotice")}
+                    {locale === "ar" ? "المصطفى للأقمشة" : "Al-Mostafa"}
                   </div>
                   <h3 style={{ fontSize: "var(--fs-h6)", color: "var(--fg)", marginBottom: "4px" }}>
-                    قماش تجريبي {n}
+                    {locale === "ar" ? `قماش فاخر ${n}` : `Fine Fabric ${n}`}
                   </h3>
                   <p style={{ fontSize: "var(--fs-body)", color: "var(--fg-muted)" }}>
                     {t(locale, "demoPrice")}
@@ -611,22 +614,38 @@ export default function HomePage() {
                 style={{
                   fontSize: "var(--fs-body)",
                   lineHeight: "var(--lh-body)",
-                  color: hasRealValue(STORE_SETTINGS.ADDRESS) ? "var(--fg)" : "var(--color-warning)",
+                  color: "var(--fg)",
                   marginBottom: "8px",
                 }}
               >
-                📍 {STORE_SETTINGS.ADDRESS}
+                📍 {locale === "ar" ? STORE_SETTINGS.ADDRESS_AR : STORE_SETTINGS.ADDRESS_EN}
               </p>
 
               <p
                 style={{
                   fontSize: "var(--fs-notice)",
                   lineHeight: "var(--lh-notice)",
-                  color: hasRealValue(STORE_SETTINGS.HOURS) ? "var(--fg-muted)" : "var(--color-warning)",
+                  color: "var(--fg-muted)",
+                  marginBottom: "8px",
+                }}
+              >
+                🕒 {locale === "ar" ? STORE_SETTINGS.HOURS_AR : STORE_SETTINGS.HOURS_EN}
+              </p>
+
+              <p
+                style={{
+                  fontSize: "var(--fs-notice)",
+                  lineHeight: "var(--lh-notice)",
+                  color: "var(--fg-muted)",
                   marginBottom: "24px",
                 }}
               >
-                🕒 {STORE_SETTINGS.HOURS}
+                <a
+                  href={`mailto:${STORE_SETTINGS.EMAIL}`}
+                  style={{ color: "var(--price)", textDecoration: "underline" }}
+                >
+                  {STORE_SETTINGS.EMAIL}
+                </a>
               </p>
 
               <div

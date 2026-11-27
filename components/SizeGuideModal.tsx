@@ -53,11 +53,11 @@ export default function SizeGuideModal({ open, onClose }: Props) {
 
         {/* Note */}
         <p style={{
-          background: "rgba(180,100,0,0.15)",
-          border: "1px solid rgba(180,100,0,0.3)",
+          background: "var(--bg)",
+          border: "1px solid var(--border)",
           borderRadius: "var(--radius-sm)",
           padding: "0.75rem 1rem",
-          color: "#ffa040",
+          color: "var(--fg-muted)",
           fontSize: "0.82rem",
           marginBottom: "1.5rem",
           lineHeight: 1.6,

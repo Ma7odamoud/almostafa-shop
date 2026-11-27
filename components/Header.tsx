@@ -73,11 +73,6 @@ export default function Header() {
 
   return (
     <>
-      {/* Demo warning bar */}
-      <div className="demo-banner" role="banner">
-        {t(locale, "demoBanner")}
-      </div>
-
       <header
         style={{
           position: "sticky",

@@ -129,12 +129,12 @@ export default function FabricForm({ fabric, onCancel, onSaved }: Props) {
         <Section label="Price & Stock">
           <Row>
             <div>
-              <label style={labelStyle}>Price per metre (⚠️ set real price)</label>
+              <label style={labelStyle}>Price per metre</label>
               <input type="number" min={0} step={0.01} value={form.pricePerMeter}
                 onChange={(e) => set("pricePerMeter", +e.target.value)} style={inputStyle} />
             </div>
             <div>
-              <label style={labelStyle}>Stock in metres (⚠️ set real stock)</label>
+              <label style={labelStyle}>Stock in metres</label>
               <input type="number" min={0} step={0.5} value={form.stockMeters}
                 onChange={(e) => set("stockMeters", +e.target.value)} style={inputStyle} />
             </div>

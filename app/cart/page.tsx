@@ -57,7 +57,7 @@ export default function CartPage() {
                     </p>
                   </div>
                   <div style={{ textAlign: "end" }}>
-                    <p style={{ color: hasPrice ? "var(--fg)" : "#ffa040", fontSize: "1.1rem", marginBottom: "0.5rem" }}>
+                    <p style={{ color: "var(--price)", fontSize: "1.1rem", marginBottom: "0.5rem" }}>
                       {hasPrice ? (item.meters * item.pricePerMeter).toFixed(2) : t(locale, "demoPrice")}
                     </p>
                     <button
@@ -88,7 +88,7 @@ export default function CartPage() {
           {/* Total */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
             <span style={{ color: "var(--fg)", fontSize: "1.1rem" }}>{t(locale, "total")}</span>
-            <span style={{ color: total > 0 ? "var(--fg)" : "#ffa040", fontSize: "1.3rem" }}>
+            <span style={{ color: "var(--price)", fontSize: "1.3rem" }}>
               {total > 0 ? total.toFixed(2) : t(locale, "demoPrice")}
             </span>
           </div>

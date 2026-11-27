@@ -83,19 +83,6 @@ export default function AdminDashboardClient({ email }: { email: string }) {
         <button onClick={logout} style={outlineBtn}>{t(locale, "adminLogout")}</button>
       </div>
 
-      {/* Demo banner */}
-      <div style={{
-        background: "rgba(180,80,0,0.12)",
-        border: "1px solid rgba(180,80,0,0.3)",
-        borderRadius: "var(--radius-sm)",
-        padding: "0.75rem 1rem",
-        color: "#ffa040",
-        fontSize: "0.82rem",
-        marginBottom: "1.5rem",
-      }}>
-        {t(locale, "adminDemoBanner")}
-      </div>
-
       {/* Tabs */}
       <div style={{ display: "flex", gap: "0.5rem", marginBottom: "2rem", borderBottom: "1px solid var(--border)", paddingBottom: "0.5rem" }}>
         {(["fabrics", "orders"] as Tab[]).map((t_) => (
@@ -145,10 +132,10 @@ export default function AdminDashboardClient({ email }: { email: string }) {
                       <td style={td}>{f.categoryLabel.en}</td>
                       <td style={td}>{f.materialLabel.en}</td>
                       <td style={{ ...td, color: f.pricePerMeter > 0 ? "var(--fg-body)" : "#ffa040" }}>
-                        {f.pricePerMeter > 0 ? f.pricePerMeter : "⚠️ Not set"}
+                        {f.pricePerMeter > 0 ? f.pricePerMeter : "Upon inquiry"}
                       </td>
-                      <td style={{ ...td, color: f.stockMeters > 0 ? "var(--fg-body)" : "#ffa040" }}>
-                        {f.stockMeters > 0 ? `${f.stockMeters}m` : "⚠️ Not set"}
+                      <td style={{ ...td, color: f.stockMeters > 0 ? "var(--fg-body)" : "var(--fg-muted)" }}>
+                        {f.stockMeters > 0 ? `${f.stockMeters}m` : "By order"}
                       </td>
                       <td style={td}>{f.hidden ? "🙈" : "👁"}</td>
                       <td style={{ ...td, display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>

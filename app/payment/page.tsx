@@ -20,17 +20,17 @@ export default function PaymentPage() {
   if (submitted) {
     return (
       <div style={{ maxWidth: 600, margin: "4rem auto", padding: "2rem 1.5rem", textAlign: "center" }}>
-        <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📋</div>
+        <div style={{ fontSize: "3rem", marginBottom: "1rem", color: "#6fca6f" }}>✓</div>
         <h1 style={{ color: "var(--fg)", fontSize: "1.8rem", fontWeight: 400, marginBottom: "1rem" }}>
           {t(locale, "orderConfirm")}
         </h1>
         <div style={{
-          background: "rgba(180,80,0,0.15)",
-          border: "1px solid rgba(180,80,0,0.4)",
+          background: "var(--bg-card)",
+          border: "1px solid var(--border)",
           borderRadius: "var(--radius-md)",
           padding: "1.5rem",
-          color: "#ffa040",
-          fontSize: "0.9rem",
+          color: "var(--fg-body)",
+          fontSize: "0.95rem",
           lineHeight: 1.7,
           marginBottom: "2rem",
         }}>
@@ -89,20 +89,6 @@ export default function PaymentPage() {
       </h1>
       <div className="divider-gold" />
 
-      {/* Demo warning */}
-      <div style={{
-        background: "rgba(180,80,0,0.15)",
-        border: "1px solid rgba(180,80,0,0.4)",
-        borderRadius: "var(--radius-md)",
-        padding: "1rem 1.25rem",
-        color: "#ffa040",
-        fontSize: "0.85rem",
-        marginBottom: "2rem",
-        lineHeight: 1.6,
-      }}>
-        {t(locale, "demoOrderWarning")}
-      </div>
-
       <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: "3rem" }} className="pay-grid">
         {/* Form */}
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
@@ -123,30 +109,22 @@ export default function PaymentPage() {
           {/* Payment method */}
           <div>
             <label style={labelStyle}>{t(locale, "paymentMethod")}</label>
-            <div style={{
-              background: "rgba(180,80,0,0.1)",
-              border: "1px solid rgba(180,80,0,0.3)",
-              borderRadius: "var(--radius-sm)",
-              padding: "0.75rem 1rem",
-              color: "#ffa040",
-              fontSize: "0.82rem",
-              marginBottom: "0.5rem",
-            }}>
+            <p style={{ color: "var(--fg-muted)", fontSize: "0.82rem", marginBottom: "0.75rem" }}>
               {t(locale, "paymentNote")}
-            </div>
-            {/* Demo method options — owner will replace with real methods */}
+            </p>
             {[
-              { value: "demo-cod", labelAr: "⚠️ نموذج — الدفع عند الاستلام", labelEn: "⚠️ Demo — Cash on Delivery" },
-              { value: "demo-online", labelAr: "⚠️ نموذج — دفع إلكتروني", labelEn: "⚠️ Demo — Online Payment" },
+              { value: "cod", labelAr: "الدفع عند الاستلام", labelEn: "Cash on Delivery" },
+              { value: "bank-transfer", labelAr: "تحويل بنكي / إنستا باي", labelEn: "Bank Transfer / InstaPay" },
+              { value: "card", labelAr: "بطاقة ائتمان / دفع إلكتروني", labelEn: "Credit Card / Online Payment" },
             ].map((opt) => (
-              <label key={opt.value} style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.4rem", cursor: "pointer" }}>
+              <label key={opt.value} style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.5rem", cursor: "pointer" }}>
                 <input
                   type="radio"
                   name="method"
                   value={opt.value}
                   checked={method === opt.value}
                   onChange={() => setMethod(opt.value)}
-                  style={{ accentColor: "var(--gold-light)" }}
+                  style={{ accentColor: "var(--btn-bg)" }}
                 />
                 <span style={{ color: "var(--fg-body)", fontSize: "0.9rem" }}>
                   {locale === "ar" ? opt.labelAr : opt.labelEn}
@@ -207,7 +185,7 @@ export default function PaymentPage() {
                           {item.meters} {t(locale, "meters")}
                         </p>
                       </div>
-                      <span style={{ color: item.pricePerMeter > 0 ? "var(--fg)" : "#ffa040", fontSize: "0.9rem" }}>
+                      <span style={{ color: "var(--price)", fontSize: "0.9rem" }}>
                         {item.pricePerMeter > 0 ? (item.meters * item.pricePerMeter).toFixed(2) : "—"}
                       </span>
                     </div>
@@ -215,7 +193,7 @@ export default function PaymentPage() {
                 })}
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.75rem" }}>
                   <span style={{ color: "var(--fg)", fontWeight: 500 }}>{t(locale, "total")}</span>
-                  <span style={{ color: total > 0 ? "var(--fg)" : "#ffa040", fontSize: "1.1rem" }}>
+                  <span style={{ color: "var(--price)", fontSize: "1.1rem" }}>
                     {total > 0 ? total.toFixed(2) : t(locale, "demoPrice")}
                   </span>
                 </div>

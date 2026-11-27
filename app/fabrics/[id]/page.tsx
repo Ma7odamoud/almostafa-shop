@@ -97,7 +97,7 @@ export default function FabricDetailPage() {
               alt={fabric.photos[activePhoto]?.alt ?? name}
               style={{ width: "100%", height: "100%", objectFit: "cover", transition: "opacity 0.4s ease" }}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='500' viewBox='0 0 400 500'%3E%3Crect fill='%230e1a2e' width='400' height='500'/%3E%3Ctext x='50%25' y='50%25' fill='%23b8973e' text-anchor='middle' dy='.35em' font-size='14' font-family='serif'%3E⚠️ Demo Photo%3C/text%3E%3C/svg%3E";
+                (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='500' viewBox='0 0 400 500'%3E%3Crect fill='%233B3A22' width='400' height='500'/%3E%3Ctext x='50%25' y='50%25' fill='%23D6D0BC' text-anchor='middle' dy='.35em' font-size='16' font-family='serif'%3EAl-Mostafa%3C/text%3E%3C/svg%3E";
               }}
             />
           </div>
@@ -168,19 +168,19 @@ export default function FabricDetailPage() {
             <p style={{ color: "var(--fg-muted)", fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.3rem" }}>
               {t(locale, "pricePerMeter")}
             </p>
-            <p style={{ color: hasPrice ? "var(--fg)" : "#ffa040", fontSize: "1.4rem" }}>
+            <p style={{ color: "var(--price)", fontSize: "1.4rem" }}>
               {hasPrice ? `${fabric.pricePerMeter.toFixed(2)}` : t(locale, "demoPrice")}
             </p>
           </div>
 
           {/* Stock */}
           <div style={{
-            background: "rgba(185,151,62,0.08)",
+            background: "var(--bg-card)",
             border: "1px solid var(--border)",
             borderRadius: "var(--radius-sm)",
             padding: "0.6rem 1rem",
             fontSize: "0.85rem",
-            color: hasStock ? "var(--fg-body)" : "#ffa040",
+            color: "var(--fg-body)",
           }}>
             {hasStock
               ? `${t(locale, "stockLeft")}: ${fabric.stockMeters} ${t(locale, "meters")}`
@@ -260,20 +260,20 @@ export default function FabricDetailPage() {
             </div>
 
             {/* Min cut note */}
-            <p style={{ color: "#ffa040", fontSize: "0.78rem", marginTop: "0.4rem" }}>
+            <p style={{ color: "var(--fg-muted)", fontSize: "0.78rem", marginTop: "0.4rem" }}>
               {t(locale, "minCut")}
             </p>
 
             {/* Total price */}
             <div style={{
               marginTop: "1rem",
-              background: "rgba(185,151,62,0.1)",
+              background: "var(--bg-card)",
               border: "1px solid var(--border)",
               borderRadius: "var(--radius-sm)",
               padding: "0.75rem 1rem",
             }}>
               <span style={{ color: "var(--fg-muted)", fontSize: "0.78rem" }}>{t(locale, "totalPrice")}: </span>
-              <span style={{ color: totalPrice ? "var(--fg)" : "#ffa040", fontSize: "1.1rem" }}>
+              <span style={{ color: "var(--price)", fontSize: "1.1rem" }}>
                 {totalPrice ? totalPrice : t(locale, "demoPrice")}
               </span>
             </div>

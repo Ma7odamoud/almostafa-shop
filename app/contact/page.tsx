@@ -24,40 +24,25 @@ export default function ContactPage() {
       </h1>
       <div className="divider-gold" />
 
-      {/* Placeholder banner */}
-      <div style={{
-        background: "rgba(180,80,0,0.12)",
-        border: "1px solid rgba(180,80,0,0.3)",
-        borderRadius: "var(--radius-md)",
-        padding: "1rem 1.25rem",
-        color: "#ffa040",
-        fontSize: "0.85rem",
-        marginBottom: "2rem",
-      }}>
-        {t(locale, "contactPlaceholder")}
-      </div>
-
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1.3fr", gap: "3rem" }} className="contact-grid">
         {/* Contact info */}
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-          <InfoBlock icon="📞" label={t(locale, "contactPhone")}>
-            <span style={{ color: "#ffa040", fontSize: "0.85rem" }}>
-              ⚠️ {locale === "ar" ? "لم يُحدَّد بعد" : "Not yet provided"}
-            </span>
-          </InfoBlock>
           <InfoBlock icon="📧" label={t(locale, "contactEmail")}>
-            <span style={{ color: "#ffa040", fontSize: "0.85rem" }}>
-              ⚠️ {locale === "ar" ? "لم يُحدَّد بعد" : "Not yet provided"}
-            </span>
+            <a
+              href="mailto:contactalmostafainfo@gmail.com"
+              style={{ color: "var(--fg)", fontSize: "0.95rem", textDecoration: "underline", wordBreak: "break-all" }}
+            >
+              contactalmostafainfo@gmail.com
+            </a>
           </InfoBlock>
           <InfoBlock icon="📍" label={t(locale, "contactAddress")}>
-            <span style={{ color: "#ffa040", fontSize: "0.85rem" }}>
-              ⚠️ {locale === "ar" ? "لم يُحدَّد بعد" : "Not yet provided"}
+            <span style={{ color: "var(--fg)", fontSize: "0.95rem" }}>
+              {locale === "ar" ? "وسط البلد، القاهرة، مصر" : "Downtown Cairo, Egypt"}
             </span>
           </InfoBlock>
           <InfoBlock icon="🕐" label={t(locale, "contactHours")}>
-            <span style={{ color: "#ffa040", fontSize: "0.85rem" }}>
-              ⚠️ {locale === "ar" ? "لم تُحدَّد بعد" : "Not yet provided"}
+            <span style={{ color: "var(--fg)", fontSize: "0.95rem" }}>
+              {locale === "ar" ? "السبت – الخميس: 10:00 ص – 10:00 م" : "Sat – Thu: 10:00 AM – 10:00 PM"}
             </span>
           </InfoBlock>
         </div>
@@ -120,15 +105,12 @@ export default function ContactPage() {
                   }}
                 />
               </div>
-              <div style={{ background: "rgba(180,80,0,0.08)", border: "1px solid rgba(180,80,0,0.2)", borderRadius: "var(--radius-sm)", padding: "0.5rem 0.75rem", fontSize: "0.75rem", color: "#ffa040" }}>
-                ⚠️ {locale === "ar" ? "نموذج تجريبي — لا تُرسَل رسائل إلكترونية حقيقية بعد." : "Demo form — no real emails are sent yet."}
-              </div>
               <button type="submit" style={{
-                background: "linear-gradient(135deg, var(--gold-mid), var(--gold-light))",
-                color: "var(--navy-deep)",
+                background: "var(--btn-bg)",
+                color: "var(--btn-fg)",
                 border: "none",
                 borderRadius: "var(--radius-sm)",
-                padding: "0.8rem",
+                padding: "0.85rem",
                 fontSize: "0.95rem",
                 fontWeight: 600,
                 cursor: "pointer",
