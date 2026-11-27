@@ -83,11 +83,11 @@
    THEME PALETTE VARIABLES
    ========================================================== */
 :root {
-  /* ── DEFAULT THEME: DARK MODE ── */
-  /* Page background: #3B3A22 */
-  --bg:          #3B3A22;
-  /* Cards and raised surfaces: #4A492E */
-  --bg-card:     #4A492E;
+  /* ── DEFAULT THEME: DARK MODE (Warm Obsidian) ── */
+  /* Page background: #141413 */
+  --bg:          #141413;
+  /* Cards and raised surfaces: #1E1E1B */
+  --bg-card:     #1E1E1B;
   /* Headings and main text: #EFEEEC */
   --fg:          #EFEEEC;
   /* Secondary text: #D6D0BC */
@@ -95,13 +95,13 @@
   --fg-body:     #D6D0BC;
   /* Decorative borders and ornaments: #A19984 */
   --border:      #A19984;
-  --border-subtle: rgba(161, 153, 132, 0.4);
+  --border-subtle: rgba(161, 153, 132, 0.35);
   --ornament:    #A19984;
 
   /* Primary button background: #D6D0BC */
   --btn-bg:      #D6D0BC;
-  /* Primary button label: #3B3A22 */
-  --btn-fg:      #3B3A22;
+  /* Primary button label: #141413 */
+  --btn-fg:      #141413;
   --btn-hover-bg:#EFEEEC;
 
   /* Prices and small section labels: #D6D0BC */
@@ -112,7 +112,7 @@
 
   /* Controls & Focus */
   --focus-ring:  #D6D0BC;
-  --input-bg:    #4A492E;
+  --input-bg:    #1E1E1B;
   --input-border:#A19984;
   --input-fg:    #EFEEEC;
 
