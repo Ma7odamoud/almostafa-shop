@@ -89,8 +89,8 @@
   --bg:          #080C14;
   /* Cards and raised surfaces: #101724 */
   --bg-card:     #101724;
-  /* Headings and main text: #EFEEEC */
-  --fg:          #EFEEEC;
+  /* Headings and main text: #F4F5F7 (same crisp white as Light Theme) */
+  --fg:          #F4F5F7;
   /* Secondary text: #D6D0BC */
   --fg-muted:    #D6D0BC;
   --fg-body:     #D6D0BC;
@@ -99,11 +99,11 @@
   --border-subtle: rgba(161, 153, 132, 0.32);
   --ornament:    #A19984;
 
-  /* Primary button background: #D6D0BC */
-  --btn-bg:      #D6D0BC;
+  /* Primary button background: #F4F5F7 (same crisp white as Light Theme) */
+  --btn-bg:      #F4F5F7;
   /* Primary button label: #080C14 */
   --btn-fg:      #080C14;
-  --btn-hover-bg:#EFEEEC;
+  --btn-hover-bg:#FFFFFF;
 
   /* Prices and small section labels: #D6D0BC */
   --price:       #D6D0BC;
