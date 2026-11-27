@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useLang, useTheme } from "@/components/Providers";
 import { t } from "@/lib/i18n";
 import type { Fabric } from "@/lib/demoData";
+import { ClockIcon, MapPinIcon } from "@/components/Icons";
 
 // ============================================================
 // STORE SETTINGS — Single source of truth for visit section
@@ -179,7 +180,7 @@ export default function HomePage() {
             </Link>
 
             <Link
-              href="/contact"
+              href="/contact?type=tailoring"
               style={{
                 flex: 1,
                 minHeight: 48,
@@ -207,13 +208,18 @@ export default function HomePage() {
           <p
             style={{
               fontSize: "var(--fs-micro)",
-              color: "var(--fg-muted)",
+              color: "#D6D0BC",
               lineHeight: 1.4,
               letterSpacing: "0.04em",
               margin: 0,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "4px",
             }}
           >
-            📍 {t(locale, "heroLocation")}
+            <MapPinIcon size={13} />
+            <span>{t(locale, "heroLocation")}</span>
           </p>
         </div>
       </section>
@@ -616,9 +622,14 @@ export default function HomePage() {
                   lineHeight: "var(--lh-body)",
                   color: "var(--fg)",
                   marginBottom: "8px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
                 }}
               >
-                📍 {locale === "ar" ? STORE_SETTINGS.ADDRESS_AR : STORE_SETTINGS.ADDRESS_EN}
+                <MapPinIcon size={16} />
+                <span>{locale === "ar" ? STORE_SETTINGS.ADDRESS_AR : STORE_SETTINGS.ADDRESS_EN}</span>
               </p>
 
               <p
@@ -627,9 +638,14 @@ export default function HomePage() {
                   lineHeight: "var(--lh-notice)",
                   color: "var(--fg-muted)",
                   marginBottom: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
                 }}
               >
-                🕒 {locale === "ar" ? STORE_SETTINGS.HOURS_AR : STORE_SETTINGS.HOURS_EN}
+                <ClockIcon size={15} />
+                <span>{locale === "ar" ? STORE_SETTINGS.HOURS_AR : STORE_SETTINGS.HOURS_EN}</span>
               </p>
 
               <p

@@ -16,8 +16,8 @@ const LangContext = createContext<LangCtx>({ locale: "ar", toggleLocale: () => {
 
 // ── Cart ──────────────────────────────────────────────────
 export interface CartItem { fabricId: string; fabricNameAr: string; fabricNameEn: string; meters: number; pricePerMeter: number }
-interface CartCtx { items: CartItem[]; addItem: (item: CartItem) => void; removeItem: (id: string) => void; clearCart: () => void; total: number }
-const CartContext = createContext<CartCtx>({ items: [], addItem: () => {}, removeItem: () => {}, clearCart: () => {}, total: 0 });
+interface CartCtx { items: CartItem[]; addItem: (item: CartItem) => void; updateItemMeters: (id: string, meters: number) => void; removeItem: (id: string) => void; clearCart: () => void; total: number }
+const CartContext = createContext<CartCtx>({ items: [], addItem: () => {}, updateItemMeters: () => {}, removeItem: () => {}, clearCart: () => {}, total: 0 });
 
 // ── Combined Provider ─────────────────────────────────────
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -69,6 +69,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const updateItemMeters = (id: string, meters: number) => {
+    const safeMeters = Math.max(0.5, +meters.toFixed(1));
+    setItems(prev => prev.map(i => (i.fabricId === id ? { ...i, meters: safeMeters } : i)));
+  };
+
   const removeItem = (id: string) => setItems(prev => prev.filter(i => i.fabricId !== id));
   const clearCart = () => setItems([]);
   const total = items.reduce((s, i) => s + i.meters * i.pricePerMeter, 0);
@@ -78,7 +83,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <LangContext.Provider value={{ locale, toggleLocale }}>
-        <CartContext.Provider value={{ items, addItem, removeItem, clearCart, total }}>
+        <CartContext.Provider value={{ items, addItem, updateItemMeters, removeItem, clearCart, total }}>
           {children}
         </CartContext.Provider>
       </LangContext.Provider>

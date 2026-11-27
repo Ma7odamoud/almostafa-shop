@@ -1,34 +1,91 @@
-// Single fabric view — inspired by Mood Fabrics product page layout
+// Single fabric view — Luxury tailoring detail page with specs, zoom, pill selectors, breadcrumbs
 "use client";
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useLang, useCart } from "@/components/Providers";
 import { t } from "@/lib/i18n";
 import SizeGuideModal from "@/components/SizeGuideModal";
 import { sizeGuide } from "@/lib/demoData";
 import type { Fabric } from "@/lib/demoData";
+import {
+  CheckIcon,
+  MagnifyingGlassIcon,
+  MinusIcon,
+  PlusIcon,
+  RulerIcon,
+  XIcon,
+} from "@/components/Icons";
+
+function getFabricSpecs(fabric: Fabric, locale: "ar" | "en") {
+  const mat = fabric.material.toLowerCase();
+  const cat = fabric.category.toLowerCase();
+
+  let weight = "270 g/m";
+  let seasonAr = "طوال العام";
+  let seasonEn = "All Seasons";
+
+  if (mat === "linen") {
+    weight = "220 g/m";
+    seasonAr = "صيفي وخفيف";
+    seasonEn = "Spring / Summer";
+  } else if (mat === "cashmere" || cat === "coat") {
+    weight = "380 g/m";
+    seasonAr = "شتوي دافئ";
+    seasonEn = "Autumn / Winter";
+  } else if (mat === "wool" && cat === "jacket") {
+    weight = "310 g/m";
+    seasonAr = "خريفي / شتوي";
+    seasonEn = "Autumn / Winter";
+  }
+
+  return [
+    {
+      label: locale === "ar" ? "العرض" : "Width",
+      value: locale === "ar" ? "150 سم" : "150 cm",
+    },
+    {
+      label: locale === "ar" ? "الوزن التقريبي" : "Weight",
+      value: weight,
+    },
+    {
+      label: locale === "ar" ? "الموسم" : "Season",
+      value: locale === "ar" ? seasonAr : seasonEn,
+    },
+    {
+      label: locale === "ar" ? "العناية" : "Care",
+      value: locale === "ar" ? "تنظيف جاف فقط" : "Dry Clean Only",
+    },
+  ];
+}
 
 export default function FabricDetailPage() {
   const params = useParams();
   const { locale } = useLang();
   const { addItem } = useCart();
-  const router = useRouter();
 
   const [fabric, setFabric] = useState<Fabric | null>(null);
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState(0);
-  const [meters, setMeters] = useState(1);
+  const [meters, setMeters] = useState(3.2);
   const [garment, setGarment] = useState(sizeGuide.categories[0].key);
-  const [size, setSize] = useState(sizeGuide.categories[0].sizes[0].size);
+  const [size, setSize] = useState("M / 48");
   const [sizeOpen, setSizeOpen] = useState(false);
+  const [zoomOpen, setZoomOpen] = useState(false);
   const [added, setAdded] = useState(false);
 
   useEffect(() => {
     if (!params?.id) return;
     fetch(`/api/fabrics/${params.id}`)
       .then((r) => r.json())
-      .then((d: Fabric) => { setFabric(d); setLoading(false); })
+      .then((d: Fabric) => {
+        setFabric(d);
+        const matchedCat = sizeGuide.categories.find((c) => c.key === d.category);
+        if (matchedCat) {
+          setGarment(matchedCat.key);
+        }
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, [params?.id]);
 
@@ -39,26 +96,31 @@ export default function FabricDetailPage() {
     if (sizeRow && sizeRow.meters > 0) setMeters(sizeRow.meters);
   }, [garment, size]);
 
-  if (loading) return (
-    <div style={{ padding: "4rem", textAlign: "center", color: "var(--fg-muted)" }}>
-      {t(locale, "loading")}
-    </div>
-  );
+  if (loading) {
+    return (
+      <div style={{ padding: "4rem", textAlign: "center", color: "var(--fg-muted)" }}>
+        {t(locale, "loading")}
+      </div>
+    );
+  }
 
-  if (!fabric) return (
-    <div style={{ padding: "4rem", textAlign: "center", color: "var(--fg-muted)" }}>
-      Fabric not found.
-    </div>
-  );
+  if (!fabric) {
+    return (
+      <div style={{ padding: "4rem", textAlign: "center", color: "var(--fg-muted)" }}>
+        {locale === "ar" ? "القماش غير موجود." : "Fabric not found."}
+      </div>
+    );
+  }
 
-  const name = locale === "ar" ? fabric.nameAr : fabric.nameEn;
-  const desc = locale === "ar" ? fabric.descriptionAr : fabric.descriptionEn;
+  const isAr = locale === "ar";
+  const name = isAr ? fabric.nameAr : fabric.nameEn;
+  const desc = isAr ? fabric.descriptionAr : fabric.descriptionEn;
   const hasPrice = fabric.pricePerMeter > 0;
   const hasStock = fabric.stockMeters > 0;
   const totalPrice = hasPrice ? (fabric.pricePerMeter * meters).toFixed(2) : null;
-
-  // Size guide helper: active garment categories
   const activeCat = sizeGuide.categories.find((c) => c.key === garment) ?? sizeGuide.categories[0];
+  const specs = getFabricSpecs(fabric, locale);
+  const currentImgSrc = fabric.photos[activePhoto]?.src ?? "/demo/fabric-draped-placeholder.svg";
 
   function handleAddToCart() {
     if (!fabric) return;
@@ -74,35 +136,96 @@ export default function FabricDetailPage() {
   }
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "2rem 1.5rem" }}>
-      {/* Back link */}
-      <Link href="/fabrics" style={{ color: "var(--fg-muted)", fontSize: "0.85rem", display: "inline-block", marginBottom: "1.5rem" }}>
-        {t(locale, "backToFabrics")}
-      </Link>
+    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "1.5rem 1.5rem 3rem" }}>
+      {/* Breadcrumbs */}
+      <nav
+        aria-label="Breadcrumb"
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: "0.45rem",
+          fontSize: "0.8rem",
+          color: "var(--fg-muted)",
+          marginBottom: "1.5rem",
+        }}
+      >
+        <Link href="/" style={{ color: "var(--fg-muted)" }}>
+          {t(locale, "home")}
+        </Link>
+        <span aria-hidden="true">/</span>
+        <Link href="/fabrics" style={{ color: "var(--fg-muted)" }}>
+          {t(locale, "fabrics")}
+        </Link>
+        <span aria-hidden="true">/</span>
+        <span style={{ color: "var(--fg-muted)" }}>
+          {isAr ? fabric.categoryLabel.ar : fabric.categoryLabel.en}
+        </span>
+        <span aria-hidden="true">/</span>
+        <span style={{ color: "var(--fg)", fontWeight: 500 }}>{name}</span>
+      </nav>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3rem" }} className="detail-grid">
-        {/* ── Photos ───────────────────────────────────── */}
+        {/* ── Photos + Zoom ─────────────────────────────────── */}
         <div>
-          {/* Main photo */}
-          <div style={{
-            backgroundColor: "#0a1525",
-            borderRadius: "var(--radius-md)",
-            overflow: "hidden",
-            aspectRatio: "4/5",
-            marginBottom: "0.75rem",
-          }}>
+          <div
+            onClick={() => setZoomOpen(true)}
+            role="button"
+            tabIndex={0}
+            aria-label={isAr ? "تكبير صورة القماش" : "Zoom fabric photo"}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") setZoomOpen(true);
+            }}
+            style={{
+              position: "relative",
+              backgroundColor: "var(--bg-card)",
+              borderRadius: "var(--radius-sm)",
+              overflow: "hidden",
+              aspectRatio: "4/5",
+              marginBottom: "0.75rem",
+              cursor: "zoom-in",
+            }}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={fabric.photos[activePhoto]?.src ?? "/demo/fabric-draped-placeholder.svg"}
+              src={currentImgSrc}
               alt={fabric.photos[activePhoto]?.alt ?? name}
-              style={{ width: "100%", height: "100%", objectFit: "cover", transition: "opacity 0.4s ease" }}
+              className="detail-main-img"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                transition: "transform 0.5s ease",
+              }}
               onError={(e) => {
-                (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='500' viewBox='0 0 400 500'%3E%3Crect fill='%233B3A22' width='400' height='500'/%3E%3Ctext x='50%25' y='50%25' fill='%23D6D0BC' text-anchor='middle' dy='.35em' font-size='16' font-family='serif'%3EAl-Mostafa%3C/text%3E%3C/svg%3E";
+                (e.target as HTMLImageElement).src =
+                  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='500' viewBox='0 0 400 500'%3E%3Crect fill='%233B3A22' width='400' height='500'/%3E%3Ctext x='50%25' y='50%25' fill='%23D6D0BC' text-anchor='middle' dy='.35em' font-size='16' font-family='serif'%3EAl-Mostafa%3C/text%3E%3C/svg%3E";
               }}
             />
+
+            {/* Zoom cue badge */}
+            <span
+              style={{
+                position: "absolute",
+                bottom: 12,
+                insetInlineEnd: 12,
+                backgroundColor: "rgba(0,0,0,0.55)",
+                color: "#EFEEEC",
+                padding: "6px 10px",
+                borderRadius: "var(--radius-sm)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: "0.75rem",
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              <MagnifyingGlassIcon size={14} />
+              <span>{isAr ? "تكبير" : "Zoom"}</span>
+            </span>
           </div>
 
-          {/* Thumbnail strip — horizontal, below main photo */}
+          {/* Thumbnail strip */}
           {fabric.photos.length > 1 && (
             <div style={{ display: "flex", gap: "0.5rem", overflowX: "auto", paddingBottom: "0.25rem" }}>
               {fabric.photos.map((ph, i) => (
@@ -114,11 +237,11 @@ export default function FabricDetailPage() {
                     width: 72,
                     height: 90,
                     padding: 0,
-                    border: `2px solid ${i === activePhoto ? "var(--price)" : "var(--border)"}`,
+                    border: `2px solid ${i === activePhoto ? "var(--price)" : "var(--border-subtle)"}`,
                     borderRadius: "var(--radius-sm)",
                     overflow: "hidden",
                     cursor: "pointer",
-                    background: "#0a1525",
+                    background: "var(--bg-card)",
                     transition: "border-color 0.25s ease",
                   }}
                 >
@@ -127,7 +250,9 @@ export default function FabricDetailPage() {
                     src={ph.src}
                     alt={ph.alt}
                     style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    onError={(e) => { (e.target as HTMLImageElement).style.opacity = "0.3"; }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.opacity = "0.3";
+                    }}
                   />
                 </button>
               ))}
@@ -136,179 +261,373 @@ export default function FabricDetailPage() {
         </div>
 
         {/* ── Info panel ───────────────────────────────── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-          {/* Name */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.35rem" }}>
+          {/* Name & classification */}
           <div>
-            <h1 style={{ color: "var(--fg)", fontSize: "1.8rem", fontWeight: 400, letterSpacing: "0.04em", marginBottom: "0.5rem" }}>
+            <h1
+              style={{
+                color: "var(--fg)",
+                fontSize: "clamp(1.5rem, 3vw, 2rem)",
+                fontWeight: 500,
+                letterSpacing: "0.02em",
+                marginBottom: "0.6rem",
+              }}
+            >
               {name}
             </h1>
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap" }}>
               {[
-                locale === "ar" ? fabric.categoryLabel.ar : fabric.categoryLabel.en,
-                locale === "ar" ? fabric.materialLabel.ar : fabric.materialLabel.en,
-                locale === "ar" ? fabric.patternLabel.ar : fabric.patternLabel.en,
-                locale === "ar" ? fabric.colorLabel.ar : fabric.colorLabel.en,
+                isAr ? fabric.categoryLabel.ar : fabric.categoryLabel.en,
+                isAr ? fabric.materialLabel.ar : fabric.materialLabel.en,
+                isAr ? fabric.patternLabel.ar : fabric.patternLabel.en,
+                isAr ? fabric.colorLabel.ar : fabric.colorLabel.en,
               ].map((tag) => (
-                <span key={tag} style={{
-                  background: "rgba(185,151,62,0.12)",
-                  color: "var(--fg-muted)",
-                  fontSize: "0.72rem",
-                  padding: "3px 9px",
-                  borderRadius: "var(--radius-sm)",
-                  border: "1px solid var(--border)",
-                }}>{tag}</span>
+                <span
+                  key={tag}
+                  style={{
+                    background: "var(--bg-card)",
+                    color: "var(--fg-muted)",
+                    fontSize: "0.74rem",
+                    padding: "4px 10px",
+                    borderRadius: "2px",
+                    border: "1px solid var(--border-subtle)",
+                  }}
+                >
+                  {tag}
+                </span>
               ))}
             </div>
           </div>
 
           <div className="divider-gold" style={{ margin: "0" }} />
 
-          {/* Price */}
-          <div>
-            <p style={{ color: "var(--fg-muted)", fontSize: "0.78rem", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.3rem" }}>
-              {t(locale, "pricePerMeter")}
-            </p>
-            <p style={{ color: "var(--price)", fontSize: "1.4rem" }}>
-              {hasPrice ? `${fabric.pricePerMeter.toFixed(2)}` : t(locale, "demoPrice")}
-            </p>
-          </div>
+          {/* Price & Availability */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem" }}>
+            <div>
+              <p style={{ color: "var(--fg-muted)", fontSize: "0.74rem", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "0.2rem" }}>
+                {t(locale, "pricePerMeter")}
+              </p>
+              <p style={{ color: "var(--price)", fontSize: "1.35rem", fontWeight: 500 }}>
+                {hasPrice ? `${fabric.pricePerMeter.toFixed(2)}` : t(locale, "demoPrice")}
+              </p>
+            </div>
 
-          {/* Stock */}
-          <div style={{
-            background: "var(--bg-card)",
-            border: "1px solid var(--border)",
-            borderRadius: "var(--radius-sm)",
-            padding: "0.6rem 1rem",
-            fontSize: "0.85rem",
-            color: "var(--fg-body)",
-          }}>
-            {hasStock
-              ? `${t(locale, "stockLeft")}: ${fabric.stockMeters} ${t(locale, "meters")}`
-              : t(locale, "demoStock")}
+            <span
+              style={{
+                background: "var(--bg-card)",
+                border: "1px solid var(--border-subtle)",
+                borderRadius: "var(--radius-sm)",
+                padding: "0.45rem 0.9rem",
+                fontSize: "0.82rem",
+                color: "var(--fg-body)",
+              }}
+            >
+              {hasStock
+                ? `${t(locale, "stockLeft")}: ${fabric.stockMeters} ${t(locale, "meters")}`
+                : t(locale, "demoStock")}
+            </span>
           </div>
 
           {/* Description */}
           <p style={{ color: "var(--fg-body)", lineHeight: 1.75, fontSize: "0.95rem" }}>{desc}</p>
 
+          {/* Technical Fabric Specifications */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "0.65rem",
+              backgroundColor: "var(--bg-card)",
+              border: "1px solid var(--border-subtle)",
+              borderRadius: "var(--radius-sm)",
+              padding: "0.9rem 1rem",
+            }}
+          >
+            {specs.map((spec) => (
+              <div key={spec.label}>
+                <p style={{ fontSize: "0.72rem", color: "var(--fg-muted)", marginBottom: "2px" }}>
+                  {spec.label}
+                </p>
+                <p style={{ fontSize: "0.86rem", color: "var(--fg)", fontWeight: 500 }}>
+                  {spec.value}
+                </p>
+              </div>
+            ))}
+          </div>
+
           <div className="divider-gold" style={{ margin: "0" }} />
 
-          {/* ── Quantity helper ─────────────────────────── */}
+          {/* ── Quantity Helper (Modern Pills + Integrated Stepper) ── */}
           <div>
-            <h2 style={{ color: "var(--fg)", fontSize: "1rem", fontWeight: 400, letterSpacing: "0.06em", marginBottom: "1rem" }}>
-              {t(locale, "howMuch")}
-            </h2>
-
-            {/* Garment selector */}
-            <label style={labelStyle}>{t(locale, "garmentUse")}</label>
-            <select
-              value={garment}
-              onChange={(e) => { setGarment(e.target.value); }}
-              style={selectStyle}
-            >
-              {sizeGuide.categories.map((c) => (
-                <option key={c.key} value={c.key}>
-                  {locale === "ar" ? c.labelAr : c.labelEn}
-                </option>
-              ))}
-            </select>
-
-            {/* Size selector */}
-            <label style={{ ...labelStyle, marginTop: "0.75rem" }}>{t(locale, "chooseSize")}</label>
-            <select
-              value={size}
-              onChange={(e) => setSize(e.target.value)}
-              style={selectStyle}
-            >
-              {activeCat.sizes.map((s) => (
-                <option key={s.size} value={s.size}>{s.size}</option>
-              ))}
-            </select>
-
-            {/* Size guide link */}
-            <button
-              onClick={() => setSizeOpen(true)}
-              style={{
-                background: "none", border: "none",
-                color: "var(--accent)", cursor: "pointer",
-                fontSize: "0.82rem", textDecoration: "underline",
-                marginTop: "0.4rem", display: "block",
-              }}
-            >
-              {t(locale, "sizeGuide")}
-            </button>
-
-            {/* Metres input */}
-            <label style={{ ...labelStyle, marginTop: "0.75rem" }}>{t(locale, "metersQty")}</label>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.85rem" }}>
+              <h2 style={{ color: "var(--fg)", fontSize: "0.98rem", fontWeight: 600 }}>
+                {t(locale, "howMuch")}
+              </h2>
               <button
-                onClick={() => setMeters(m => Math.max(0.5, +(m - 0.5).toFixed(1)))}
-                style={qtyBtn}
-              >−</button>
-              <input
-                type="number"
-                min={0.5}
-                step={0.5}
-                value={meters}
-                onChange={(e) => setMeters(Math.max(0.5, +e.target.value))}
-                style={{ ...selectStyle, width: 80, textAlign: "center", margin: 0 }}
-              />
-              <button
-                onClick={() => setMeters(m => +(m + 0.5).toFixed(1))}
-                style={qtyBtn}
-              >+</button>
-              <span style={{ color: "var(--fg-muted)", fontSize: "0.85rem" }}>{t(locale, "meters")}</span>
+                type="button"
+                onClick={() => setSizeOpen(true)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--price)",
+                  cursor: "pointer",
+                  fontSize: "0.8rem",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "5px",
+                  textDecoration: "underline",
+                }}
+              >
+                <RulerIcon size={15} />
+                <span>{t(locale, "sizeGuide")}</span>
+              </button>
             </div>
 
-            {/* Min cut note */}
-            <p style={{ color: "var(--fg-muted)", fontSize: "0.78rem", marginTop: "0.4rem" }}>
-              {t(locale, "minCut")}
-            </p>
+            {/* Garment pill selector */}
+            <label style={labelStyle}>{t(locale, "garmentUse")}</label>
+            <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+              {sizeGuide.categories.map((c) => {
+                const active = garment === c.key;
+                return (
+                  <button
+                    key={c.key}
+                    type="button"
+                    onClick={() => setGarment(c.key)}
+                    style={{
+                      padding: "0.45rem 0.85rem",
+                      borderRadius: "var(--radius-sm)",
+                      border: `1px solid ${active ? "var(--btn-bg)" : "var(--border)"}`,
+                      backgroundColor: active ? "var(--btn-bg)" : "transparent",
+                      color: active ? "var(--btn-fg)" : "var(--fg-body)",
+                      fontSize: "0.82rem",
+                      fontWeight: active ? 600 : 400,
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    {isAr ? c.labelAr : c.labelEn}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Size pill selector */}
+            <label style={labelStyle}>{t(locale, "chooseSize")}</label>
+            <div style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap", marginBottom: "1.1rem" }}>
+              {activeCat.sizes.map((s) => {
+                const active = size === s.size;
+                return (
+                  <button
+                    key={s.size}
+                    type="button"
+                    onClick={() => setSize(s.size)}
+                    style={{
+                      padding: "0.4rem 0.7rem",
+                      borderRadius: "var(--radius-sm)",
+                      border: `1px solid ${active ? "var(--btn-bg)" : "var(--border)"}`,
+                      backgroundColor: active ? "var(--btn-bg)" : "transparent",
+                      color: active ? "var(--btn-fg)" : "var(--fg-body)",
+                      fontSize: "0.78rem",
+                      fontWeight: active ? 600 : 400,
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    {s.size}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Integrated Stepper */}
+            <label style={labelStyle}>{t(locale, "metersQty")}</label>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--radius-sm)",
+                  backgroundColor: "var(--bg-card)",
+                  overflow: "hidden",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setMeters((m) => Math.max(0.5, +(m - 0.5).toFixed(1)))}
+                  aria-label={isAr ? "تقليل الكمية" : "Decrease quantity"}
+                  style={stepperBtn}
+                >
+                  <MinusIcon size={15} />
+                </button>
+                <span
+                  style={{
+                    minWidth: 68,
+                    textAlign: "center",
+                    fontSize: "0.95rem",
+                    fontWeight: 600,
+                    color: "var(--fg)",
+                    padding: "0 0.5rem",
+                  }}
+                >
+                  {meters} {isAr ? "م" : "m"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setMeters((m) => +(m + 0.5).toFixed(1))}
+                  aria-label={isAr ? "زيادة الكمية" : "Increase quantity"}
+                  style={stepperBtn}
+                >
+                  <PlusIcon size={15} />
+                </button>
+              </div>
+
+              <span style={{ color: "var(--fg-muted)", fontSize: "0.78rem" }}>
+                {t(locale, "minCut")}
+              </span>
+            </div>
 
             {/* Total price */}
-            <div style={{
-              marginTop: "1rem",
-              background: "var(--bg-card)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-sm)",
-              padding: "0.75rem 1rem",
-            }}>
-              <span style={{ color: "var(--fg-muted)", fontSize: "0.78rem" }}>{t(locale, "totalPrice")}: </span>
-              <span style={{ color: "var(--price)", fontSize: "1.1rem" }}>
+            <div
+              style={{
+                marginTop: "1rem",
+                background: "var(--bg-card)",
+                border: "1px solid var(--border-subtle)",
+                borderRadius: "var(--radius-sm)",
+                padding: "0.75rem 1rem",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span style={{ color: "var(--fg-muted)", fontSize: "0.82rem" }}>
+                {t(locale, "totalPrice")}
+              </span>
+              <span style={{ color: "var(--price)", fontSize: "1.1rem", fontWeight: 600 }}>
                 {totalPrice ? totalPrice : t(locale, "demoPrice")}
               </span>
             </div>
           </div>
 
-          {/* Add to cart */}
-          <button
-            onClick={handleAddToCart}
-            style={{
-              width: "100%",
-              background: added
-                ? "rgba(100,200,100,0.2)"
-                : "var(--btn-bg)",
-              color: added ? "#6fca6f" : "var(--btn-fg)",
-              border: added ? "1px solid #6fca6f" : "none",
-              borderRadius: "var(--radius-sm)",
-              padding: "1rem",
-              fontSize: "1rem",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              cursor: "pointer",
-              fontWeight: 600,
-              transition: "all 0.3s ease",
-            }}
-          >
-            {added ? (locale === "ar" ? "✓ أُضيف للسلة" : "✓ Added to Cart") : t(locale, "addToCart")}
-          </button>
+          {/* Primary + Secondary CTAs */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
+            <button
+              onClick={handleAddToCart}
+              style={{
+                width: "100%",
+                minHeight: 50,
+                background: added ? "rgba(100,200,100,0.18)" : "var(--btn-bg)",
+                color: added ? "#6fca6f" : "var(--btn-fg)",
+                border: added ? "1px solid #6fca6f" : "none",
+                borderRadius: "var(--radius-sm)",
+                padding: "0.9rem 1rem",
+                fontSize: "0.95rem",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                fontWeight: 600,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                transition: "all 0.25s ease",
+              }}
+            >
+              {added && <CheckIcon size={18} />}
+              <span>{added ? (isAr ? "أُضيف للسلة" : "Added to Cart") : t(locale, "addToCart")}</span>
+            </button>
+
+            <Link
+              href={`/contact?type=tailoring&fabric=${encodeURIComponent(name)}`}
+              style={{
+                width: "100%",
+                minHeight: 46,
+                background: "transparent",
+                color: "var(--fg)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--radius-sm)",
+                padding: "0.75rem 1rem",
+                fontSize: "0.88rem",
+                fontWeight: 500,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                transition: "background-color 0.2s ease",
+              }}
+            >
+              {isAr ? "اطلب تفصيل أو استفسر عن السعر" : "Request Tailoring or Price Inquiry"}
+            </Link>
+          </div>
         </div>
       </div>
 
+      {/* Size Guide Modal */}
       <SizeGuideModal open={sizeOpen} onClose={() => setSizeOpen(false)} />
 
+      {/* Zoom Lightbox Modal */}
+      {zoomOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={isAr ? "عرض مكبر للقماش" : "Zoomed fabric view"}
+          onClick={() => setZoomOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 2500,
+            backgroundColor: "rgba(0,0,0,0.88)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "1.5rem",
+            cursor: "zoom-out",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setZoomOpen(false)}
+            aria-label={t(locale, "close")}
+            style={{
+              position: "absolute",
+              top: 20,
+              insetInlineEnd: 20,
+              background: "rgba(255,255,255,0.12)",
+              border: "none",
+              color: "#EFEEEC",
+              borderRadius: "50%",
+              width: 44,
+              height: 44,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+            }}
+          >
+            <XIcon size={22} />
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={currentImgSrc}
+            alt={name}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: "92vw",
+              maxHeight: "88vh",
+              objectFit: "contain",
+              borderRadius: "var(--radius-sm)",
+              cursor: "default",
+            }}
+          />
+        </div>
+      )}
+
       <style>{`
+        .detail-main-img:hover {
+          transform: scale(1.04);
+        }
         @media (max-width: 767px) {
-          .detail-grid { grid-template-columns: 1fr !important; }
+          .detail-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
         }
       `}</style>
     </div>
@@ -318,32 +637,19 @@ export default function FabricDetailPage() {
 const labelStyle: React.CSSProperties = {
   display: "block",
   color: "var(--fg-muted)",
-  fontSize: "0.78rem",
+  fontSize: "0.75rem",
   textTransform: "uppercase",
   letterSpacing: "0.07em",
-  marginBottom: "0.3rem",
+  marginBottom: "0.45rem",
 };
 
-const selectStyle: React.CSSProperties = {
-  width: "100%",
-  background: "var(--bg-card)",
-  border: "1px solid var(--border)",
-  color: "var(--fg-body)",
-  borderRadius: "var(--radius-sm)",
-  padding: "0.5rem 0.75rem",
-  fontSize: "0.9rem",
-  cursor: "pointer",
-};
-
-const qtyBtn: React.CSSProperties = {
-  background: "var(--bg-card)",
-  border: "1px solid var(--border)",
+const stepperBtn: React.CSSProperties = {
+  background: "transparent",
+  border: "none",
   color: "var(--fg)",
-  borderRadius: "var(--radius-sm)",
-  width: 32,
-  height: 32,
+  width: 42,
+  height: 42,
   cursor: "pointer",
-  fontSize: "1.1rem",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",

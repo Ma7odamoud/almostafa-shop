@@ -1,13 +1,15 @@
-// Cart page
+// Cart page with inline quantity stepper
 "use client";
 import React from "react";
 import Link from "next/link";
 import { useLang, useCart } from "@/components/Providers";
 import { t } from "@/lib/i18n";
+import { MinusIcon, PlusIcon } from "@/components/Icons";
 
 export default function CartPage() {
   const { locale } = useLang();
-  const { items, removeItem, total } = useCart();
+  const { items, updateItemMeters, removeItem, total } = useCart();
+  const isAr = locale === "ar";
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "2rem 1.5rem" }}>
@@ -35,7 +37,7 @@ export default function CartPage() {
         <>
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2rem" }}>
             {items.map((item) => {
-              const name = locale === "ar" ? item.fabricNameAr : item.fabricNameEn;
+              const name = isAr ? item.fabricNameAr : item.fabricNameEn;
               const hasPrice = item.pricePerMeter > 0;
               return (
                 <div key={item.fabricId} style={{
@@ -43,37 +45,69 @@ export default function CartPage() {
                   justifyContent: "space-between",
                   alignItems: "center",
                   backgroundColor: "var(--bg-card)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "var(--radius-md)",
+                  border: "1px solid var(--border-subtle)",
+                  borderRadius: "var(--radius-sm)",
                   padding: "1rem 1.25rem",
                   gap: "1rem",
                   flexWrap: "wrap",
                 }}>
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ color: "var(--fg)", fontWeight: 400, marginBottom: "0.25rem" }}>{name}</h3>
-                    <p style={{ color: "var(--fg-muted)", fontSize: "0.85rem" }}>
-                      {item.meters} {t(locale, "meters")}
-                      {hasPrice && ` × ${item.pricePerMeter.toFixed(2)}`}
-                    </p>
+                  <div style={{ flex: 1, minWidth: 180 }}>
+                    <Link href={`/fabrics/${item.fabricId}`} style={{ color: "var(--fg)", fontWeight: 500, fontSize: "1.02rem", display: "inline-block", marginBottom: "0.35rem" }}>
+                      {name}
+                    </Link>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+                      <div style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        border: "1px solid var(--border)",
+                        borderRadius: "var(--radius-sm)",
+                        backgroundColor: "var(--bg)",
+                      }}>
+                        <button
+                          type="button"
+                          onClick={() => updateItemMeters(item.fabricId, Math.max(0.5, item.meters - 0.5))}
+                          aria-label={isAr ? "تقليل الأمتار" : "Decrease meters"}
+                          style={{ background: "none", border: "none", color: "var(--fg)", width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                        >
+                          <MinusIcon size={13} />
+                        </button>
+                        <span style={{ minWidth: 52, textAlign: "center", fontSize: "0.85rem", fontWeight: 600, color: "var(--fg)" }}>
+                          {item.meters} {isAr ? "م" : "m"}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => updateItemMeters(item.fabricId, item.meters + 0.5)}
+                          aria-label={isAr ? "زيادة الأمتار" : "Increase meters"}
+                          style={{ background: "none", border: "none", color: "var(--fg)", width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+                        >
+                          <PlusIcon size={13} />
+                        </button>
+                      </div>
+                      {hasPrice && (
+                        <span style={{ color: "var(--fg-muted)", fontSize: "0.82rem" }}>
+                          × {item.pricePerMeter.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div style={{ textAlign: "end" }}>
-                    <p style={{ color: "var(--price)", fontSize: "1.1rem", marginBottom: "0.5rem" }}>
+                    <p style={{ color: "var(--price)", fontSize: "1.1rem", fontWeight: 500, marginBottom: "0.5rem" }}>
                       {hasPrice ? (item.meters * item.pricePerMeter).toFixed(2) : t(locale, "demoPrice")}
                     </p>
                     <button
                       onClick={() => removeItem(item.fabricId)}
                       style={{
                         background: "none",
-                        border: "1px solid var(--border)",
+                        border: "1px solid var(--border-subtle)",
                         color: "var(--fg-muted)",
                         borderRadius: "var(--radius-sm)",
-                        padding: "0.2rem 0.6rem",
+                        padding: "0.25rem 0.65rem",
                         cursor: "pointer",
                         fontSize: "0.78rem",
                         transition: "color 0.2s, border-color 0.2s",
                       }}
                       onMouseEnter={(e) => { e.currentTarget.style.color = "#e55"; e.currentTarget.style.borderColor = "#e55"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = "var(--fg-muted)"; e.currentTarget.style.borderColor = "var(--border)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = "var(--fg-muted)"; e.currentTarget.style.borderColor = "var(--border-subtle)"; }}
                     >
                       {t(locale, "remove")}
                     </button>
@@ -88,7 +122,7 @@ export default function CartPage() {
           {/* Total */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
             <span style={{ color: "var(--fg)", fontSize: "1.1rem" }}>{t(locale, "total")}</span>
-            <span style={{ color: "var(--price)", fontSize: "1.3rem" }}>
+            <span style={{ color: "var(--price)", fontSize: "1.3rem", fontWeight: 600 }}>
               {total > 0 ? total.toFixed(2) : t(locale, "demoPrice")}
             </span>
           </div>

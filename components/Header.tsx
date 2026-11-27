@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTheme, useLang, useCart } from "./Providers";
 import { t } from "@/lib/i18n";
 import {
@@ -13,6 +13,7 @@ import {
   CaretLeftIcon,
   CaretRightIcon,
   ConcreteShoppingBagIcon,
+  MagnifyingGlassIcon,
 } from "./Icons";
 
 export default function Header() {
@@ -20,8 +21,11 @@ export default function Header() {
   const { locale, toggleLocale } = useLang();
   const { items } = useCart();
   const pathname = usePathname();
+  const router = useRouter();
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
   const [scrolled, setScrolled] = useState(false);
 
   // Total cart item count
@@ -175,10 +179,32 @@ export default function Header() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "8px",
+              gap: "4px",
               zIndex: 10,
             }}
           >
+            {/* Search Toggle */}
+            <button
+              onClick={() => setSearchOpen((s) => !s)}
+              aria-label={isAr ? "بحث" : "Search"}
+              title={isAr ? "بحث عن قماش" : "Search fabrics"}
+              style={{
+                background: "none",
+                border: "none",
+                color: iconColor,
+                cursor: "pointer",
+                minWidth: 40,
+                minHeight: 44,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "8px",
+                transition: "color 0.2s ease, opacity 0.2s ease",
+              }}
+            >
+              <MagnifyingGlassIcon size={20} />
+            </button>
+
             {/* Theme Toggle Button (Compact Sun/Moon icon in header) */}
             <button
               onClick={toggleTheme}
@@ -364,6 +390,83 @@ export default function Header() {
             </Link>
           </div>
         </div>
+
+        {/* Expandable Search Bar */}
+        {searchOpen && (
+          <div
+            style={{
+              borderTop: "1px solid var(--border-subtle)",
+              backgroundColor: "var(--bg)",
+              padding: "10px 15px",
+            }}
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const q = searchInput.trim();
+                setSearchOpen(false);
+                router.push(q ? `/fabrics?q=${encodeURIComponent(q)}` : "/fabrics");
+              }}
+              style={{
+                maxWidth: 680,
+                margin: "0 auto",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <input
+                type="search"
+                autoFocus
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder={
+                  isAr
+                    ? "ابحث عن قماش (صوف، كتان، كحلي...)"
+                    : "Search fabrics (wool, linen, navy...)"
+                }
+                style={{
+                  flex: 1,
+                  padding: "8px 12px",
+                  borderRadius: "var(--radius-sm)",
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--bg-card)",
+                  color: "var(--fg)",
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  padding: "9px 16px",
+                  borderRadius: "var(--radius-sm)",
+                  border: "none",
+                  backgroundColor: "var(--btn-bg)",
+                  color: "var(--btn-fg)",
+                  fontWeight: 600,
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                }}
+              >
+                {isAr ? "بحث" : "Search"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSearchOpen(false)}
+                aria-label={t(locale, "close")}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--fg-muted)",
+                  cursor: "pointer",
+                  padding: "8px",
+                  display: "flex",
+                }}
+              >
+                <XIcon size={18} />
+              </button>
+            </form>
+          </div>
+        )}
       </header>
 
       {/* Slide-out Menu Drawer */}

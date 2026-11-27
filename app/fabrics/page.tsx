@@ -1,29 +1,31 @@
-// Fabrics browse page — garment grouping + filter sidebar
+// Fabrics browse page — unified continuous grid + search + accordion filters
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useLang } from "@/components/Providers";
 import { t } from "@/lib/i18n";
 import FabricCard from "@/components/FabricCard";
 import FilterSidebar from "@/components/FilterSidebar";
+import { MagnifyingGlassIcon, SlidersIcon, XIcon } from "@/components/Icons";
 import type { Fabric } from "@/lib/demoData";
 
-// ⚠️ OWNER NOTE: The fabric browse and single-fabric view are on the
-// same /fabrics page (browsing) and /fabrics/[id] (single view).
-// Please confirm whether you want browsing and single-view on separate
-// pages or combined, and we will adjust accordingly.
-
 const CATEGORIES = [
-  { key: "suit",    labelAr: "بدل",      labelEn: "Suits" },
-  { key: "jacket",  labelAr: "جاكيتات",  labelEn: "Jackets" },
-  { key: "trousers",labelAr: "بناطيل",   labelEn: "Trousers" },
-  { key: "coat",    labelAr: "معاطف",    labelEn: "Coats" },
+  { key: "suit",     labelAr: "بدل",     labelEn: "Suits" },
+  { key: "jacket",   labelAr: "جاكيتات", labelEn: "Jackets" },
+  { key: "trousers", labelAr: "بناطيل",  labelEn: "Trousers" },
+  { key: "coat",     labelAr: "معاطف",   labelEn: "Coats" },
 ];
 
-export default function FabricsPage() {
+function FabricsContent() {
   const { locale } = useLang();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const initialQuery = searchParams.get("q") ?? "";
+
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [filters, setFilters] = useState({
     colors: [] as string[],
     patterns: [] as string[],
@@ -32,9 +34,16 @@ export default function FabricsPage() {
   });
 
   useEffect(() => {
+    setSearchQuery(searchParams.get("q") ?? "");
+  }, [searchParams]);
+
+  useEffect(() => {
     fetch("/api/fabrics")
       .then((r) => r.json())
-      .then((d) => { setFabrics(d as Fabric[]); setLoading(false); })
+      .then((d) => {
+        setFabrics(d as Fabric[]);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, []);
 
@@ -62,29 +71,149 @@ export default function FabricsPage() {
     };
   }, [fabrics]);
 
-  // Apply filters
-  const filtered = useMemo(() => fabrics.filter((f) => {
-    if (filters.colors.length && !filters.colors.includes(f.color)) return false;
-    if (filters.patterns.length && !filters.patterns.includes(f.pattern)) return false;
-    if (filters.materials.length && !filters.materials.includes(f.material)) return false;
-    if (filters.categories.length && !filters.categories.includes(f.category)) return false;
-    return true;
-  }), [fabrics, filters]);
+  // Apply filters + search query
+  const filtered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return fabrics.filter((f) => {
+      if (filters.colors.length && !filters.colors.includes(f.color)) return false;
+      if (filters.patterns.length && !filters.patterns.includes(f.pattern)) return false;
+      if (filters.materials.length && !filters.materials.includes(f.material)) return false;
+      if (filters.categories.length && !filters.categories.includes(f.category)) return false;
+      if (q) {
+        const searchable = [
+          f.nameAr,
+          f.nameEn,
+          f.descriptionAr,
+          f.descriptionEn,
+          f.colorLabel.ar,
+          f.colorLabel.en,
+          f.materialLabel.ar,
+          f.materialLabel.en,
+          f.patternLabel.ar,
+          f.patternLabel.en,
+          f.categoryLabel.ar,
+          f.categoryLabel.en,
+        ]
+          .join(" ")
+          .toLowerCase();
+        if (!searchable.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [fabrics, filters, searchQuery]);
 
-  const hasFilters = filters.colors.length + filters.patterns.length + filters.materials.length + filters.categories.length > 0;
+  const hasFilters =
+    filters.colors.length +
+      filters.patterns.length +
+      filters.materials.length +
+      filters.categories.length >
+    0;
+
+  function clearSearch() {
+    setSearchQuery("");
+    if (searchParams.get("q")) {
+      router.replace("/fabrics");
+    }
+  }
 
   return (
     <div style={{ maxWidth: 1400, margin: "0 auto", padding: "2rem 1.5rem" }}>
-      {/* Page title */}
-      <div style={{ marginBottom: "2rem" }}>
-        <h1 style={{ color: "var(--fg)", fontSize: "clamp(1.5rem, 3vw, 2.2rem)", fontWeight: 400, letterSpacing: "0.06em" }}>
+      {/* Page title + Search */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "1rem",
+          marginBottom: "1rem",
+        }}
+      >
+        <h1
+          style={{
+            color: "var(--fg)",
+            fontSize: "clamp(1.5rem, 3vw, 2.2rem)",
+            fontWeight: 400,
+            letterSpacing: "0.06em",
+          }}
+        >
           {t(locale, "allFabrics")}
         </h1>
-        <div className="divider-gold" />
+
+        {/* Search input */}
+        <div
+          style={{
+            position: "relative",
+            width: "min(340px, 100%)",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <span
+            style={{
+              position: "absolute",
+              insetInlineStart: 12,
+              color: "var(--fg-muted)",
+              display: "flex",
+              pointerEvents: "none",
+            }}
+          >
+            <MagnifyingGlassIcon size={18} />
+          </span>
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={
+              locale === "ar"
+                ? "ابحث بالاسم، الخامة، أو اللون..."
+                : "Search by fabric, material, or color..."
+            }
+            aria-label={locale === "ar" ? "بحث في الأقمشة" : "Search fabrics"}
+            style={{
+              width: "100%",
+              paddingInlineStart: 38,
+              paddingInlineEnd: searchQuery ? 36 : 12,
+              paddingTop: 10,
+              paddingBottom: 10,
+              borderRadius: "var(--radius-sm)",
+              border: "1px solid var(--border)",
+              backgroundColor: "var(--bg-card)",
+              color: "var(--fg)",
+            }}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              aria-label={locale === "ar" ? "مسح البحث" : "Clear search"}
+              style={{
+                position: "absolute",
+                insetInlineEnd: 8,
+                background: "none",
+                border: "none",
+                color: "var(--fg-muted)",
+                cursor: "pointer",
+                display: "flex",
+                padding: 4,
+              }}
+            >
+              <XIcon size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
+      <div className="divider-gold" style={{ marginTop: "0.5rem" }} />
+
       {/* Mobile filter button */}
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }} className="mobile-filter-btn">
+      <div
+        style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}
+        className="mobile-filter-btn"
+      >
+        <span style={{ fontSize: "0.85rem", color: "var(--fg-muted)" }}>
+          {filtered.length} {locale === "ar" ? "قماش" : "fabrics"}
+        </span>
         <button
           onClick={() => setMobileFilterOpen(true)}
           style={{
@@ -97,11 +226,13 @@ export default function FabricsPage() {
             fontSize: "0.85rem",
             display: "flex",
             alignItems: "center",
-            gap: "0.4rem",
+            gap: "0.45rem",
+            minHeight: 40,
           }}
         >
-          ⚙ {t(locale, "filterTitle")}
-          {hasFilters && <span style={{ color: "var(--gold-light)" }}>•</span>}
+          <SlidersIcon size={16} />
+          <span>{t(locale, "filterTitle")}</span>
+          {hasFilters && <span style={{ color: "var(--price)" }}>•</span>}
         </button>
       </div>
 
@@ -134,8 +265,8 @@ export default function FabricsPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-                gap: "1.25rem",
+                gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))",
+                gap: "1.75rem 1.25rem",
               }}
             >
               {filtered.map((f) => (
@@ -152,5 +283,13 @@ export default function FabricsPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function FabricsPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "3rem", textAlign: "center" }}>...</div>}>
+      <FabricsContent />
+    </Suspense>
   );
 }
