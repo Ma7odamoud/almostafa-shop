@@ -191,39 +191,39 @@
   }
 }
 
-/* ── LIGHT MODE PALETTE ── */
+/* ── LIGHT MODE PALETTE (Matched to Blue-Black) ── */
 [data-theme="light"] {
-  /* Page background: #EFEEEC */
-  --bg:          #EFEEEC;
-  /* Cards and raised surfaces: #F7F6F4 */
-  --bg-card:     #F7F6F4;
-  /* Headings and main text: #3B3A22 */
-  --fg:          #3B3A22;
-  /* Secondary text: #706B58 */
-  --fg-muted:    #706B58;
-  --fg-body:     #706B58;
-  /* Decorative borders and ornaments: #A19984 */
-  --border:      #A19984;
-  --border-subtle: rgba(161, 153, 132, 0.35);
-  --ornament:    #A19984;
+  /* Page background: #F4F5F7 */
+  --bg:          #F4F5F7;
+  /* Cards and raised surfaces: #FAFBFD */
+  --bg-card:     #FAFBFD;
+  /* Headings and main text: #080C14 (Blue-Black) */
+  --fg:          #080C14;
+  /* Secondary text: #4A5568 */
+  --fg-muted:    #4A5568;
+  --fg-body:     #4A5568;
+  /* Decorative borders and ornaments: #B8C0CC */
+  --border:      #B8C0CC;
+  --border-subtle: rgba(8, 12, 20, 0.12);
+  --ornament:    #B8C0CC;
 
-  /* Primary button background: #3B3A22 */
-  --btn-bg:      #3B3A22;
-  /* Primary button label: #EFEEEC */
-  --btn-fg:      #EFEEEC;
-  --btn-hover-bg:#262516;
+  /* Primary button background: #080C14 */
+  --btn-bg:      #080C14;
+  /* Primary button label: #F4F5F7 */
+  --btn-fg:      #F4F5F7;
+  --btn-hover-bg:#162033;
 
-  /* Prices and small section labels: #3B3A22 */
-  --price:       #3B3A22;
-  --label-small: #3B3A22;
-  --accent:      #3B3A22;
-  --accent-hover:#706B58;
+  /* Prices and small section labels: #080C14 */
+  --price:       #080C14;
+  --label-small: #080C14;
+  --accent:      #080C14;
+  --accent-hover:#4A5568;
 
   /* Controls & Focus */
-  --focus-ring:  #3B3A22;
-  --input-bg:    #F7F6F4;
-  --input-border:#A19984;
-  --input-fg:    #3B3A22;
+  --focus-ring:  #080C14;
+  --input-bg:    #FAFBFD;
+  --input-border:#B8C0CC;
+  --input-fg:    #080C14;
 }
 
 /* ---- Base ---- */
