@@ -83,6 +83,7 @@
    THEME PALETTE VARIABLES
    ========================================================== */
 :root {
+  color-scheme: dark;
   /* ── DEFAULT THEME: DARK MODE (Blue-Black / Deep Midnight Navy) ── */
   /* Page background: #080C14 */
   --bg:          #080C14;
@@ -193,6 +194,7 @@
 
 /* ── LIGHT MODE PALETTE (Matched to Blue-Black) ── */
 [data-theme="light"] {
+  color-scheme: light;
   /* Page background: #F4F5F7 */
   --bg:          #F4F5F7;
   /* Cards and raised surfaces: #FAFBFD */
@@ -276,6 +278,18 @@ input, select, textarea {
   background-color: var(--input-bg);
   color: var(--input-fg);
   border: 1px solid var(--input-border);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="search"]::-webkit-search-cancel-button {
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="search"]::-webkit-search-cancel-button:hover {
+  opacity: 1;
 }
 
 /* ---- Links ---- */
