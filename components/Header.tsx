@@ -567,6 +567,8 @@ export default function Header() {
               {[
                 { href: "/", label: t(locale, "home") },
                 { href: "/fabrics", label: t(locale, "fabrics") },
+                { href: "/bespoke", label: isAr ? "التفصيل الخاص" : "Bespoke Tailoring" },
+                { href: "/about", label: isAr ? "قصتنا" : "Our Heritage" },
                 { href: "/contact", label: t(locale, "contact") },
                 { href: "/cart", label: `${t(locale, "cart")} (${cartCount})` },
               ].map(({ href, label }) => {

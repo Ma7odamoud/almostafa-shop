@@ -86,8 +86,8 @@ export default function Footer() {
               {[
                 { href: "/", label: t(locale, "home") },
                 { href: "/fabrics", label: t(locale, "fabrics") },
-                { href: "/contact?type=tailoring", label: isAr ? "حجز موعد تفصيل" : "Bespoke Tailoring" },
-                { href: "/cart", label: t(locale, "cart") },
+                { href: "/bespoke", label: isAr ? "التفصيل الخاص" : "Bespoke Tailoring" },
+                { href: "/about", label: isAr ? "قصتنا وتراثنا" : "Our Heritage" },
                 { href: "/contact", label: t(locale, "contact") },
               ].map(({ href, label }) => (
                 <Link
@@ -110,13 +110,13 @@ export default function Footer() {
             </h3>
             <nav style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
               {[
-                { href: "/fabrics", label: isAr ? "أقمشة البدل" : "Suiting Fabrics" },
-                { href: "/fabrics", label: isAr ? "أقمشة الجاكيتات" : "Jacketing" },
-                { href: "/fabrics", label: isAr ? "أقمشة البناطيل" : "Trousering" },
-                { href: "/fabrics", label: isAr ? "أقمشة المعاطف" : "Overcoating" },
+                { href: "/fabrics?category=suit", label: isAr ? "أقمشة البدل" : "Suiting Fabrics" },
+                { href: "/fabrics?category=jacket", label: isAr ? "أقمشة الجاكيتات" : "Jacketing" },
+                { href: "/fabrics?category=trousers", label: isAr ? "أقمشة البناطيل" : "Trousering" },
+                { href: "/fabrics?category=coat", label: isAr ? "أقمشة المعاطف" : "Overcoating" },
               ].map(({ href, label }) => (
                 <Link
-                  key={label}
+                  key={href}
                   href={href}
                   style={linkStyle}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}
@@ -133,7 +133,25 @@ export default function Footer() {
             <h3 style={headingStyle}>
               {isAr ? "خدمة العملاء والمعرض" : "Client Concierge"}
             </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
+              {[
+                { href: "/care-guide", label: isAr ? "دليل المقاسات والعناية" : "Measurement & Care Guide" },
+                { href: "/faq", label: isAr ? "الأسئلة الشائعة" : "FAQ" },
+                { href: "/shipping-policy", label: isAr ? "الشحن وسياسة الاسترجاع" : "Shipping & Return Policy" },
+              ].map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  style={linkStyle}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "var(--fg-muted)")}
+                >
+                  {label}
+                </Link>
+              ))}
+
+              <div style={{ height: 6 }} />
+
               <a
                 href="mailto:contactalmostafainfo@gmail.com"
                 style={{
@@ -202,17 +220,29 @@ export default function Footer() {
             {t(locale, "footerRights")}
           </p>
 
-          <p
-            style={{
-              color: "var(--fg-muted)",
-              fontSize: "0.72rem",
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              margin: 0,
-            }}
-          >
-            {isAr ? "القاهرة · مصر" : "CAIRO · EGYPT"}
-          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap", justifyContent: "center" }}>
+            <Link
+              href="/privacy"
+              style={{
+                color: "var(--fg-muted)",
+                fontSize: "0.72rem",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+              }}
+            >
+              {isAr ? "الخصوصية والشروط" : "Privacy & Terms"}
+            </Link>
+            <span
+              style={{
+                color: "var(--fg-muted)",
+                fontSize: "0.72rem",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+              }}
+            >
+              {isAr ? "القاهرة · مصر" : "CAIRO · EGYPT"}
+            </span>
+          </div>
         </div>
       </div>
 

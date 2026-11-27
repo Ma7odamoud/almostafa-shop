@@ -380,8 +380,8 @@ export default function HomePage() {
               fabrics.map((fabric) => {
                 const name = locale === "ar" ? fabric.nameAr : fabric.nameEn;
                 const material = locale === "ar" ? fabric.materialLabel.ar : fabric.materialLabel.en;
+                const pattern = locale === "ar" ? fabric.patternLabel.ar : fabric.patternLabel.en;
                 const imgSrc = fabric.photos[0]?.src || "/demo/fabric-draped-placeholder.svg";
-                const isOutOfStock = fabric.stockMeters === 0;
 
                 return (
                   <Link
@@ -389,33 +389,29 @@ export default function HomePage() {
                     href={`/fabrics/${fabric.id}`}
                     style={{
                       flex: "0 0 calc(68vw)",
-                      maxWidth: 280,
-                      minWidth: 210,
+                      maxWidth: 270,
+                      minWidth: 205,
                       scrollSnapAlign: "start",
                       textDecoration: "none",
                       display: "block",
-                      opacity: isOutOfStock ? 0.65 : 1,
                     }}
                   >
-                    <div
-                      className="hover-lift"
+                    <article
                       style={{
-                        backgroundColor: "var(--bg-card)",
-                        border: "1px solid var(--border)",
-                        borderRadius: "var(--radius-md)",
+                        backgroundColor: "transparent",
                         overflow: "hidden",
                         height: "100%",
                         display: "flex",
                         flexDirection: "column",
-                        position: "relative",
                       }}
                     >
-                      {/* Photo */}
+                      {/* Borderless Editorial Photo */}
                       <div
                         style={{
                           position: "relative",
                           paddingTop: "125%",
-                          backgroundColor: "var(--bg)",
+                          backgroundColor: "var(--bg-card)",
+                          borderRadius: "var(--radius-sm)",
                           overflow: "hidden",
                         }}
                       >
@@ -430,65 +426,64 @@ export default function HomePage() {
                             width: "100%",
                             height: "100%",
                             objectFit: "cover",
+                            transition: "transform 0.5s ease",
                           }}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = "/demo/fabric-draped-placeholder.svg";
                           }}
                         />
 
-                        {isOutOfStock && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: 8,
-                              right: locale === "ar" ? "auto" : 8,
-                              left: locale === "ar" ? 8 : "auto",
-                              backgroundColor: "var(--bg)",
-                              color: "var(--color-warning)",
-                              fontSize: "var(--fs-micro)",
-                              padding: "2px 8px",
-                              borderRadius: "var(--radius-sm)",
-                              border: "1px solid var(--border)",
-                            }}
-                          >
-                            {t(locale, "outOfStock")}
-                          </div>
-                        )}
+                        <span
+                          style={{
+                            position: "absolute",
+                            top: 10,
+                            right: locale === "ar" ? "auto" : 10,
+                            left: locale === "ar" ? 10 : "auto",
+                            backgroundColor: "var(--bg)",
+                            color: "var(--fg)",
+                            fontSize: "0.65rem",
+                            fontWeight: 600,
+                            padding: "3px 8px",
+                            borderRadius: "2px",
+                            letterSpacing: "0.08em",
+                            textTransform: "uppercase",
+                            opacity: 0.92,
+                          }}
+                        >
+                          {locale === "ar" ? fabric.categoryLabel.ar : fabric.categoryLabel.en}
+                        </span>
                       </div>
 
                       {/* Card Content */}
-                      <div style={{ padding: "12px", flex: 1, display: "flex", flexDirection: "column" }}>
-                        <span
-                          style={{
-                            fontSize: "var(--fs-notice)",
-                            color: "var(--fg-muted)",
-                            lineHeight: "var(--lh-notice)",
-                            marginBottom: "4px",
-                          }}
-                          className="uppercase-en"
-                        >
-                          {material}
-                        </span>
-
+                      <div style={{ padding: "12px 2px 4px", flex: 1, display: "flex", flexDirection: "column" }}>
                         <h3
                           style={{
-                            fontSize: "var(--fs-h6)",
-                            lineHeight: "var(--lh-h6)",
-                            fontWeight: "var(--fw-h6)" as unknown as number,
+                            fontSize: "0.98rem",
+                            lineHeight: 1.35,
+                            fontWeight: 500,
                             color: "var(--fg)",
-                            marginBottom: "8px",
-                            flex: 1,
+                            marginBottom: "4px",
                           }}
                         >
                           {name}
                         </h3>
 
+                        <span
+                          style={{
+                            fontSize: "0.78rem",
+                            color: "var(--fg-muted)",
+                            marginBottom: "6px",
+                          }}
+                        >
+                          {material} · {pattern}
+                        </span>
+
                         <div
                           style={{
-                            fontSize: "var(--fs-body)",
-                            fontWeight: "var(--fw-body)" as unknown as number,
-                            lineHeight: "var(--lh-body)",
-                            color: fabric.pricePerMeter > 0 ? "var(--price)" : "var(--color-warning)",
+                            fontSize: "0.86rem",
+                            fontWeight: 500,
+                            color: "var(--price)",
+                            marginTop: "auto",
                           }}
                         >
                           {fabric.pricePerMeter > 0 ? (
@@ -496,11 +491,11 @@ export default function HomePage() {
                               {fabric.pricePerMeter} {t(locale, "priceUnit")}
                             </span>
                           ) : (
-                            <span style={{ fontSize: "var(--fs-micro)" }}>{t(locale, "demoPrice")}</span>
+                            <span>{t(locale, "demoPrice")}</span>
                           )}
                         </div>
                       </div>
-                    </div>
+                    </article>
                   </Link>
                 );
               })
@@ -541,7 +536,270 @@ export default function HomePage() {
       </section>
 
       {/* ──────────────────────────────────────────────────────────
-          3. ADDRESS & VISIT SECTION (Split showroom layout)
+          3. SHOP BY COLLECTION (4-Card Editorial Grid)
+          ────────────────────────────────────────────────────────── */}
+      <section
+        style={{
+          maxWidth: 1280,
+          margin: "0 auto",
+          padding: "2rem 15px 3rem",
+        }}
+      >
+        <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>
+          <span
+            style={{
+              fontSize: "var(--fs-micro)",
+              color: "var(--fg-muted)",
+              letterSpacing: "0.14em",
+              display: "block",
+              marginBottom: "6px",
+            }}
+            className="uppercase-en"
+          >
+            {locale === "ar" ? "تصفح حسب القطعة" : "CURATED BY GARMENT"}
+          </span>
+          <h2
+            style={{
+              fontSize: "var(--fs-h2)",
+              lineHeight: "var(--lh-h2)",
+              fontWeight: "var(--fw-h2)" as unknown as number,
+              color: "var(--fg)",
+            }}
+            className="uppercase-en"
+          >
+            {locale === "ar" ? "الأقسام" : "Collections"}
+          </h2>
+        </div>
+
+        <div
+          className="collections-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: "14px",
+          }}
+        >
+          {[
+            {
+              key: "suit",
+              titleAr: "أقمشة البدل",
+              titleEn: "Suiting",
+              subAr: "صوف ميرينو وكتان",
+              subEn: "Merino Wool & Linen",
+            },
+            {
+              key: "jacket",
+              titleAr: "أقمشة الجاكيتات",
+              titleEn: "Jacketing",
+              subAr: "تويد ونقوش كلاسيكية",
+              subEn: "Tweed & Checks",
+            },
+            {
+              key: "trousers",
+              titleAr: "أقمشة البناطيل",
+              titleEn: "Trousering",
+              subAr: "ثبات وانسيابية عالية",
+              subEn: "Structured Drape",
+            },
+            {
+              key: "coat",
+              titleAr: "أقمشة المعاطف",
+              titleEn: "Overcoating",
+              subAr: "كاشمير وصوف ثقيل",
+              subEn: "Cashmere & Heavy Wool",
+            },
+          ].map((col) => (
+            <Link
+              key={col.key}
+              href={`/fabrics?category=${col.key}`}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "flex-end",
+                minHeight: 160,
+                padding: "1.5rem 1.25rem",
+                backgroundColor: "var(--bg-card)",
+                border: "1px solid var(--border-subtle)",
+                borderRadius: "var(--radius-sm)",
+                textDecoration: "none",
+                transition: "border-color 0.25s ease, transform 0.25s ease",
+              }}
+              className="hover-lift"
+            >
+              <span
+                style={{
+                  fontSize: "0.75rem",
+                  color: "var(--fg-muted)",
+                  marginBottom: "4px",
+                }}
+              >
+                {locale === "ar" ? col.subAr : col.subEn}
+              </span>
+              <span
+                style={{
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  color: "var(--fg)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+                className="uppercase-en"
+              >
+                <span>{locale === "ar" ? col.titleAr : col.titleEn}</span>
+                <span style={{ opacity: 0.7 }}>{locale === "ar" ? "←" : "→"}</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ──────────────────────────────────────────────────────────
+          4. THE BESPOKE PROCESS (3-Step Editorial Band)
+          ────────────────────────────────────────────────────────── */}
+      <section
+        style={{
+          backgroundColor: "var(--bg-card)",
+          borderTop: "1px solid var(--border-subtle)",
+          borderBottom: "1px solid var(--border-subtle)",
+          padding: "3.5rem 15px",
+          margin: "1rem 0 2.5rem",
+        }}
+      >
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+            <span
+              style={{
+                fontSize: "var(--fs-micro)",
+                color: "var(--fg-muted)",
+                letterSpacing: "0.14em",
+                display: "block",
+                marginBottom: "6px",
+              }}
+              className="uppercase-en"
+            >
+              {locale === "ar" ? "تجربة المصطفى" : "THE BESPOKE JOURNEY"}
+            </span>
+            <h2
+              style={{
+                fontSize: "var(--fs-h2)",
+                lineHeight: "var(--lh-h2)",
+                fontWeight: "var(--fw-h2)" as unknown as number,
+                color: "var(--fg)",
+              }}
+              className="uppercase-en"
+            >
+              {locale === "ar" ? "من القماش إلى البدلة الكاملة" : "From Cloth to Craft"}
+            </h2>
+          </div>
+
+          <div
+            className="bespoke-steps-grid"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr",
+              gap: "1.75rem",
+              marginBottom: "2.25rem",
+            }}
+          >
+            {[
+              {
+                num: "01",
+                titleAr: "اختيار القماش",
+                titleEn: "Select Your Cloth",
+                descAr: "تصفح خامات الصوف الإيطالي، الكتان، والكاشمير بالمتر أو اطلب استشارة.",
+                descEn: "Browse fine merino wool, pure linen, and cashmere by the meter.",
+              },
+              {
+                num: "02",
+                titleAr: "أخذ المقاسات بدقة",
+                titleEn: "Precision Fitting",
+                descAr: "زيارة سريعة لمعرضنا في وسط البلد لأخذ المقاسات وتحديد تفاصيل القصة.",
+                descEn: "Visit our Downtown Cairo atelier for personal measurements and styling.",
+              },
+              {
+                num: "03",
+                titleAr: "التفصيل والتسليم",
+                titleEn: "Master Craftsmanship",
+                descAr: "تفصيل يدوي متقن وبروفة نهائية تضمن لك إطلالة مريحة ومثالية.",
+                descEn: "Hand-finished tailoring with a final fitting tailored to your silhouette.",
+              },
+            ].map((step) => (
+              <div
+                key={step.num}
+                style={{
+                  padding: "1.5rem",
+                  backgroundColor: "var(--bg)",
+                  border: "1px solid var(--border-subtle)",
+                  borderRadius: "var(--radius-sm)",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.14em",
+                    color: "var(--price)",
+                    display: "block",
+                    marginBottom: "8px",
+                  }}
+                >
+                  {step.num}
+                </span>
+                <h3 style={{ fontSize: "1.05rem", fontWeight: 600, color: "var(--fg)", marginBottom: "8px" }}>
+                  {locale === "ar" ? step.titleAr : step.titleEn}
+                </h3>
+                <p style={{ fontSize: "0.86rem", color: "var(--fg-muted)", lineHeight: 1.65 }}>
+                  {locale === "ar" ? step.descAr : step.descEn}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "center", gap: "12px", flexWrap: "wrap" }}>
+            <Link
+              href="/bespoke"
+              style={{
+                minHeight: 46,
+                padding: "0 24px",
+                backgroundColor: "var(--btn-bg)",
+                color: "var(--btn-fg)",
+                borderRadius: "var(--radius-sm)",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "0.88rem",
+                fontWeight: 600,
+              }}
+              className="uppercase-en hover-lift"
+            >
+              {locale === "ar" ? "اكتشف خدمة التفصيل" : "Explore Bespoke Tailoring"}
+            </Link>
+            <Link
+              href="/about"
+              style={{
+                minHeight: 46,
+                padding: "0 24px",
+                backgroundColor: "transparent",
+                color: "var(--fg)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--radius-sm)",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "0.88rem",
+                fontWeight: 500,
+              }}
+              className="uppercase-en hover-lift"
+            >
+              {locale === "ar" ? "قصة المصطفى" : "Our Heritage"}
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ──────────────────────────────────────────────────────────
+          5. ADDRESS & VISIT SECTION (Split showroom layout)
           ────────────────────────────────────────────────────────── */}
       <section
         style={{
@@ -790,6 +1048,13 @@ export default function HomePage() {
         @media (min-width: 768px) {
           .desktop-scroll-arrow {
             display: flex;
+          }
+          .collections-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 18px !important;
+          }
+          .bespoke-steps-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
           }
           .visit-split-grid {
             grid-template-columns: 1fr 1fr !important;

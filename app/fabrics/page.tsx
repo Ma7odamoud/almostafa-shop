@@ -21,6 +21,7 @@ function FabricsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialQuery = searchParams.get("q") ?? "";
+  const initialCategory = searchParams.get("category") ?? "";
 
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,11 +31,15 @@ function FabricsContent() {
     colors: [] as string[],
     patterns: [] as string[],
     materials: [] as string[],
-    categories: [] as string[],
+    categories: initialCategory ? [initialCategory] : ([] as string[]),
   });
 
   useEffect(() => {
     setSearchQuery(searchParams.get("q") ?? "");
+    const cat = searchParams.get("category");
+    if (cat) {
+      setFilters((prev) => ({ ...prev, categories: [cat] }));
+    }
   }, [searchParams]);
 
   useEffect(() => {
