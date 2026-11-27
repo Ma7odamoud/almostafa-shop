@@ -613,7 +613,7 @@ export default function Header() {
         }
         .header-logo-img {
           width: auto !important;
-          max-height: 50px !important;
+          max-height: 54px !important;
         }
 
         @media (min-width: 768px) {
@@ -622,7 +622,7 @@ export default function Header() {
             padding: 10px 24px;
           }
           .header-logo-img {
-            max-height: 55px !important;
+            max-height: 64px !important;
           }
         }
 

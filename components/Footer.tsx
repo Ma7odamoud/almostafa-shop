@@ -58,9 +58,9 @@ export default function Footer() {
               <Image
                 src={logoSrc}
                 alt="Al-Mostafa"
-                width={150}
-                height={58}
-                style={{ objectFit: "contain", maxHeight: 58, width: "auto" }}
+                width={180}
+                height={82}
+                style={{ objectFit: "contain", maxHeight: 82, width: "auto" }}
               />
             </Link>
             <p
