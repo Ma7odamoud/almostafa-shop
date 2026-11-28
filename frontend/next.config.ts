@@ -7,8 +7,13 @@ const API_INTERNAL_URL = process.env.API_INTERNAL_URL ?? "http://localhost:5080"
 const nextConfig: NextConfig = {
   experimental: {
     agentFeedback: true,
+    // Because proxy.ts exists, Next.js buffers request bodies — including proxied photo uploads — up to this
+    // size (default 10 MB) and forwards a truncated body beyond it. Keep it above Media:MaxUploadBytes (20 MB).
+    proxyClientMaxBodySize: "25mb",
   },
   poweredByHeader: false,
+  // Self-contained server bundle for the container image (see frontend/Dockerfile).
+  output: "standalone",
   turbopack: {
     rules: {
       "*.css": {

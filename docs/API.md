@@ -37,7 +37,7 @@ The machine-readable contract is [`backend/openapi/almostafa-api.json`](../backe
 | PATCH | `/admin/fabrics/{id}/visibility` | `{ hidden: boolean }` | 200, 404 |
 | DELETE | `/admin/fabrics/{id}` | Delete. Past orders keep their snapshots. | 204, 404 |
 | GET | `/admin/orders` | Orders newest first. Query `page`, `pageSize`. | 200 `PagedResult<OrderDto>` |
-| POST | `/admin/uploads` | `multipart/form-data`, field `file`. JPEG/PNG/WebP/GIF/AVIF up to `Media:MaxUploadBytes` (8 MB). | 201 `{ url: "/uploads/<hex>.<ext>" }`, 413, 415 |
+| POST | `/admin/uploads` | `multipart/form-data`, field `file`. JPEG/PNG/WebP up to `Media:MaxUploadBytes` (20 MB). Stored as WebP, max 2000 px, rotated upright, metadata removed. | 201 `{ url: "/uploads/<hex>.webp" }`, 413, 415 |
 
 `UpsertFabricRequest`:
 

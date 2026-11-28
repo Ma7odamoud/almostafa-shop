@@ -198,7 +198,7 @@ frontend/src/
 | Credential theft / brute force | Hashed passwords, lockout, login rate limit, generic error messages. |
 | XSS stealing sessions | HttpOnly cookie; no tokens in `localStorage`; photo `src` must be a site-relative path. |
 | CSRF | SameSite=Strict + antiforgery header on admin mutations. |
-| Malicious uploads | Magic-byte image check (JPEG/PNG/WebP/GIF/AVIF), size cap, random file names, `nosniff` + sandbox CSP on `/uploads`. |
+| Malicious uploads / leaked location | Magic-byte check (JPEG/PNG/WebP), 20 MB cap, every photo decoded and re-encoded as WebP (≤ 2000 px, upright) so EXIF/GPS metadata never reaches the site, random file names, `nosniff` + sandbox CSP on `/uploads`. |
 | Injection | EF Core parameterised queries; `LIKE` wildcards escaped. |
 | Information leakage | Problem Details without stack traces; hidden fabrics indistinguishable from missing ones. |
 | Spoofed client IPs | Forwarded headers trusted only from configured proxies; edge proxy must overwrite `X-Forwarded-For` (see DEPLOYMENT.md). |

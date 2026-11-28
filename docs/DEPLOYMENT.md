@@ -1,5 +1,9 @@
 # Production deployment
 
+> **Recommended path:** the ready-made single-server stack in [`deploy/`](../deploy) (Docker Compose: PostgreSQL,
+> API, website and Caddy with automatic HTTPS, plus `backup.sh` / `restore.sh`). Step-by-step instructions:
+> [LAUNCH.md](LAUNCH.md). The rest of this page explains the moving parts for custom setups.
+
 ## Topology
 
 ```

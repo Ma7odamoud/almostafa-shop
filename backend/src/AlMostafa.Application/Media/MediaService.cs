@@ -9,8 +9,8 @@ public sealed class MediaOptions
 {
     public const string SectionName = "Media";
 
-    /// <summary>Maximum accepted upload size in bytes (default 8 MB).</summary>
-    public long MaxUploadBytes { get; set; } = 8 * 1024 * 1024;
+    /// <summary>Maximum accepted upload size in bytes (default 20 MB — enough for full-resolution phone photos).</summary>
+    public long MaxUploadBytes { get; set; } = 20 * 1024 * 1024;
 }
 
 /// <summary>Port to the file store (local disk today; S3 / R2 / Azure Blob can be added without touching callers).</summary>
@@ -20,9 +20,27 @@ public interface IFileStorage
     Task<string> SaveAsync(Stream content, string fileName, CancellationToken cancellationToken);
 }
 
+/// <summary>Port to the image codec: makes an upload web-ready (oriented, resized, metadata-free).</summary>
+public interface IImageProcessor
+{
+    /// <exception cref="InvalidImageException">The bytes cannot be decoded as an image.</exception>
+    Task<ProcessedImage> ProcessAsync(Stream source, CancellationToken cancellationToken);
+}
+
+public sealed record ProcessedImage(byte[] Content, string Extension, int Width, int Height);
+
+public sealed class InvalidImageException : Exception
+{
+    public InvalidImageException() : base("The file could not be read as an image.") { }
+
+    public InvalidImageException(string message) : base(message) { }
+
+    public InvalidImageException(string message, Exception innerException) : base(message, innerException) { }
+}
+
 public sealed record UploadResultDto(string Url);
 
-public sealed class MediaService(IFileStorage storage, IOptions<MediaOptions> options, ILogger<MediaService> logger)
+public sealed class MediaService(IFileStorage storage, IImageProcessor images, IOptions<MediaOptions> options, ILogger<MediaService> logger)
 {
     private const int SniffLength = 16;
 
@@ -31,19 +49,32 @@ public sealed class MediaService(IFileStorage storage, IOptions<MediaOptions> op
         if (length <= 0)
             throw new DomainException("file_required", "No file provided.");
         if (length > options.Value.MaxUploadBytes)
-            throw new DomainException("file_too_large", $"Files must be at most {options.Value.MaxUploadBytes / (1024 * 1024)} MB.");
+            throw new DomainException("file_too_large", $"Photos must be at most {options.Value.MaxUploadBytes / (1024 * 1024)} MB.");
 
         // Identify the type from the file's magic bytes; the client-declared name and MIME type are not trusted.
         var header = new byte[SniffLength];
         var read = await content.ReadAtLeastAsync(header, SniffLength, throwOnEndOfStream: false, cancellationToken);
-        var extension = DetectImageExtension(header.AsSpan(0, read))
-            ?? throw new DomainException("unsupported_media_type", "Only JPEG, PNG, WebP, GIF and AVIF images are allowed.");
+        if (DetectImageExtension(header.AsSpan(0, read)) is null)
+            throw new DomainException("unsupported_media_type",
+                "Only JPEG, PNG and WebP photos are accepted. On iPhone, set Camera → Formats → Most Compatible.");
 
-        var fileName = $"{Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(16))}.{extension}";
-        using var full = new ConcatenatedStream(header.AsMemory(0, read), content);
-        var url = await storage.SaveAsync(full, fileName, cancellationToken);
+        ProcessedImage processed;
+        try
+        {
+            using var full = new ConcatenatedStream(header.AsMemory(0, read), content);
+            processed = await images.ProcessAsync(full, cancellationToken);
+        }
+        catch (InvalidImageException)
+        {
+            throw new DomainException("unsupported_media_type", "The photo could not be read. Please try another file.");
+        }
 
-        logger.LogInformation("Uploaded image {FileName} ({Bytes} bytes)", fileName, length);
+        var fileName = $"{Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(16))}.{processed.Extension}";
+        using var output = new MemoryStream(processed.Content, writable: false);
+        var url = await storage.SaveAsync(output, fileName, cancellationToken);
+
+        logger.LogInformation("Uploaded photo {FileName}: {InputBytes} bytes in, {Width}x{Height} {OutputBytes} bytes stored",
+            fileName, length, processed.Width, processed.Height, processed.Content.Length);
         return new UploadResultDto(url);
     }
 
@@ -51,9 +82,7 @@ public sealed class MediaService(IFileStorage storage, IOptions<MediaOptions> op
     {
         if (h.Length >= 3 && h[0] == 0xFF && h[1] == 0xD8 && h[2] == 0xFF) return "jpg";
         if (h.Length >= 8 && h[..8].SequenceEqual(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A })) return "png";
-        if (h.Length >= 6 && (h[..6].SequenceEqual("GIF87a"u8) || h[..6].SequenceEqual("GIF89a"u8))) return "gif";
         if (h.Length >= 12 && h[..4].SequenceEqual("RIFF"u8) && h[8..12].SequenceEqual("WEBP"u8)) return "webp";
-        if (h.Length >= 12 && h[4..8].SequenceEqual("ftyp"u8) && (h[8..12].SequenceEqual("avif"u8) || h[8..12].SequenceEqual("avis"u8))) return "avif";
         return null;
     }
 

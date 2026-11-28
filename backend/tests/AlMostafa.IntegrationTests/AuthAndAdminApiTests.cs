@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using SkiaSharp;
 
 namespace AlMostafa.IntegrationTests;
 
@@ -106,20 +107,69 @@ public class AuthAndAdminApiTests(ApiFactory factory) : IClassFixture<ApiFactory
     }
 
     [Fact]
-    public async Task Upload_accepts_real_images_and_serves_them()
+    public async Task Upload_rotates_upright_and_strips_location_metadata()
     {
         var ct = TestContext.Current.CancellationToken;
         var admin = await factory.CreateAdminClientAsync();
-        byte[] png = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3, 4];
+        var original = await File.ReadAllBytesAsync(Path.Combine(AppContext.BaseDirectory, "Fixtures", "rotated-with-gps.jpg"), ct);
 
-        var response = await admin.PostAsync("/api/v1/admin/uploads", Multipart(png, "photo.png", "image/png"), ct);
+        var response = await admin.PostAsync("/api/v1/admin/uploads", Multipart(original, "IMG_0001.jpg", "image/jpeg"), ct);
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var url = (await response.JsonAsync()).GetProperty("url").GetString()!;
-        Assert.Matches("^/uploads/[0-9a-f]{32}\\.png$", url);
+        Assert.Matches("^/uploads/[0-9a-f]{32}\\.webp$", url);
+
         var served = await factory.CreateClient().GetAsync(url, ct);
         Assert.Equal(HttpStatusCode.OK, served.StatusCode);
-        Assert.Equal(png, await served.Content.ReadAsByteArrayAsync(ct));
+        Assert.Equal("image/webp", served.Content.Headers.ContentType?.MediaType);
+        var bytes = await served.Content.ReadAsByteArrayAsync(ct);
+
+        using var bitmap = SKBitmap.Decode(bytes);
+        // Stored 400x200 with "rotate 90° clockwise": upright it is 200x400, red on top, blue at the bottom.
+        Assert.Equal(200, bitmap.Width);
+        Assert.Equal(400, bitmap.Height);
+        Assert.True(bitmap.GetPixel(100, 50).Red > 150 && bitmap.GetPixel(100, 50).Blue < 100, "top should be red");
+        Assert.True(bitmap.GetPixel(100, 350).Blue > 150 && bitmap.GetPixel(100, 350).Red < 100, "bottom should be blue");
+
+        // No EXIF block survives (it held the GPS position and the camera make).
+        Assert.DoesNotContain("Exif", System.Text.Encoding.ASCII.GetString(bytes), StringComparison.Ordinal);
+        Assert.DoesNotContain("TestPhoneMaker", System.Text.Encoding.ASCII.GetString(bytes), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Upload_scales_large_photos_down_for_the_web()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var admin = await factory.CreateAdminClientAsync();
+        var original = await File.ReadAllBytesAsync(Path.Combine(AppContext.BaseDirectory, "Fixtures", "large-4000x3000.jpg"), ct);
+
+        var response = await admin.PostAsync("/api/v1/admin/uploads", Multipart(original, "big.jpg", "image/jpeg"), ct);
+        var url = (await response.JsonAsync()).GetProperty("url").GetString()!;
+        using var bitmap = SKBitmap.Decode(await factory.CreateClient().GetByteArrayAsync(url, ct));
+
+        Assert.Equal(2000, bitmap.Width);
+        Assert.Equal(1500, bitmap.Height);
+    }
+
+    [Fact]
+    public async Task Upload_rejects_iphone_heic_with_guidance()
+    {
+        byte[] heic = [0, 0, 0, 0x18, (byte)'f', (byte)'t', (byte)'y', (byte)'p', (byte)'h', (byte)'e', (byte)'i', (byte)'c', 0, 0, 0, 0];
+        var admin = await factory.CreateAdminClientAsync();
+        var response = await admin.PostAsync("/api/v1/admin/uploads", Multipart(heic, "IMG_0002.HEIC", "image/heic"), TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.UnsupportedMediaType, response.StatusCode);
+        Assert.Contains("Most Compatible", (await response.JsonAsync()).GetProperty("detail").GetString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Upload_rejects_a_corrupt_image_that_only_looks_like_a_png()
+    {
+        byte[] fake = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3, 4];
+        var admin = await factory.CreateAdminClientAsync();
+        var response = await admin.PostAsync("/api/v1/admin/uploads", Multipart(fake, "x.png", "image/png"), TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.UnsupportedMediaType, response.StatusCode);
     }
 
     [Fact]

@@ -1,0 +1,81 @@
+# Production stack for one server: database, API, website and an HTTPS reverse proxy.
+# Usage (from this folder):  cp .env.example .env  →  edit .env  →  docker compose up -d --build
+name: almostafa
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: almostafa
+      POSTGRES_USER: almostafa
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/.env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U almostafa -d almostafa"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [internal]
+
+  api:
+    build: ../backend
+    image: almostafa-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Database: Host=db;Database=almostafa;Username=almostafa;Password=${POSTGRES_PASSWORD}
+      # Single server: apply pending database migrations on start (they only ever add, never delete).
+      Database__MigrateOnStartup: "true"
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?Set ADMIN_EMAIL in deploy/.env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      # Requests arrive from the website container; trust its X-Forwarded-For (set by Caddy) on this network only.
+      ForwardedHeaders__KnownNetworks__0: 172.30.0.0/24
+      Media__MaxUploadBytes: "20971520"
+    volumes:
+      - uploads:/app/data/uploads
+    networks: [internal]
+
+  web:
+    build:
+      context: ../frontend
+      args:
+        API_INTERNAL_URL: http://api:8080
+    image: almostafa-web
+    restart: unless-stopped
+    depends_on: [api]
+    environment:
+      API_INTERNAL_URL: http://api:8080
+      SITE_URL: https://${DOMAIN:?Set DOMAIN in deploy/.env}
+    networks: [internal]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [web]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [internal]
+
+networks:
+  internal:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  pgdata:     # all shop data: fabrics, orders, admin account
+  uploads:    # fabric photos
+  caddy_data: # HTTPS certificates
+  caddy_config:

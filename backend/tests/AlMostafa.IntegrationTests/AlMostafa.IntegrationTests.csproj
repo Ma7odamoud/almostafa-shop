@@ -15,4 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\AlMostafa.API\AlMostafa.API.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Fixtures/**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

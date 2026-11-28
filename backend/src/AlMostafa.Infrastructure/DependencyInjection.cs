@@ -61,6 +61,7 @@ public static class DependencyInjection
         services.AddSingleton(sp => new ResolvedUploadsPath(
             Path.GetFullPath(sp.GetRequiredService<IOptions<StorageOptions>>().Value.UploadsPath, environment.ContentRootPath)));
         services.AddSingleton<IFileStorage, LocalFileStorage>();
+        services.AddSingleton<IImageProcessor, SkiaImageProcessor>();
 
         services.Configure<LegacyImportOptions>(configuration.GetSection(LegacyImportOptions.SectionName));
         services.AddScoped<LegacyDataImporter>();

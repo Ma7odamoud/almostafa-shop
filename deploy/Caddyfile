@@ -1,0 +1,22 @@
+# Caddy obtains and renews the HTTPS certificate for {$DOMAIN} automatically.
+{$DOMAIN} {
+	encode zstd gzip
+
+	# Fabric photos up to 20 MB plus form overhead.
+	request_body {
+		max_size 25MB
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	# Caddy replaces any client-supplied X-Forwarded-For with the real visitor address,
+	# which the API uses for rate limiting.
+	reverse_proxy web:3000
+}
+
+www.{$DOMAIN} {
+	redir https://{$DOMAIN}{uri} permanent
+}

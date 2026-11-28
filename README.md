@@ -38,6 +38,7 @@ Admin area: http://localhost:3000/admin/login (not linked from the customer navi
 - [Architecture](docs/ARCHITECTURE.md) — structure, modules, database, authentication flow, security, design decisions
 - [API reference](docs/API.md) — endpoints, request/response shapes, error codes
 - [Local development](docs/DEVELOPMENT.md) — setup, tests, environment variables, migrations, API type generation
+- [**Launch guide**](docs/LAUNCH.md) — put the shop online on one server, step by step
 - [Production deployment](docs/DEPLOYMENT.md) — topology, reverse proxy, migrations, importing the old JSON data
 
 ## Tests
@@ -73,4 +74,4 @@ TypeScript types up to date, no un-migrated model changes).
 | Size guide meterage | ⚠️ Confirm values in `frontend/src/features/catalog/data/size-guide.ts` |
 | Store phone / map link | ⚠️ Fill in `frontend/src/lib/constants/store.ts` |
 | Hero / showroom photos | ⚠️ Add `frontend/public/assets/hero/hero.jpg` and `frontend/public/assets/showroom/showroom.jpg` |
-| HTTPS + reverse proxy | ⚠️ Required — see [deployment](docs/DEPLOYMENT.md) |
+| HTTPS + hosting | ✅ Ready: `deploy/` stack with automatic HTTPS and backups — follow [LAUNCH.md](docs/LAUNCH.md) |

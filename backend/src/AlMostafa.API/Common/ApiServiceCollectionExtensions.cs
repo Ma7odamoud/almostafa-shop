@@ -45,7 +45,7 @@ internal static class ApiServiceCollectionExtensions
         services.AddCorsPolicy(configuration);
 
         // Uploads: cap multipart bodies a little above the media limit; MediaService enforces the exact limit.
-        var maxUpload = configuration.GetValue($"{MediaOptions.SectionName}:{nameof(MediaOptions.MaxUploadBytes)}", 8L * 1024 * 1024);
+        var maxUpload = configuration.GetValue($"{MediaOptions.SectionName}:{nameof(MediaOptions.MaxUploadBytes)}", 20L * 1024 * 1024);
         services.Configure<MediaOptions>(configuration.GetSection(MediaOptions.SectionName));
         services.Configure<FormOptions>(o => o.MultipartBodyLengthLimit = maxUpload + 64 * 1024);
 

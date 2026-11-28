@@ -24,12 +24,10 @@ public static class DatabaseInitializer
 
         if (configuration.GetValue("Database:MigrateOnStartup", false))
         {
-            var pending = (await db.Database.GetPendingMigrationsAsync(cancellationToken)).ToList();
-            if (pending.Count > 0)
-            {
-                logger.LogInformation("Applying {Count} pending migrations: {Migrations}", pending.Count, string.Join(", ", pending));
-                await db.Database.MigrateAsync(cancellationToken);
-            }
+            // MigrateAsync creates the history table when missing, so a first start logs no spurious errors.
+            await db.Database.MigrateAsync(cancellationToken);
+            var applied = await db.Database.GetAppliedMigrationsAsync(cancellationToken);
+            logger.LogInformation("Database schema is up to date ({Count} migrations applied)", applied.Count());
         }
 
         await services.GetRequiredService<AdminSeeder>().SeedAsync();

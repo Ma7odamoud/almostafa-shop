@@ -100,7 +100,7 @@ without an explicit data-migration step. CI fails if the model has changes witho
 | `Cors__AllowedOrigins__0` | none | Only needed if browsers call the API host directly |
 | `ForwardedHeaders__KnownProxies__0` / `ForwardedHeaders__KnownNetworks__0` | loopback only | Proxies allowed to set `X-Forwarded-For` |
 | `RateLimiting__GlobalPerMinute` / `LoginPerMinute` / `OrdersPerMinute` | 300 / 5 / 10 | Per-IP limits |
-| `Media__MaxUploadBytes` | 8388608 | Upload size limit |
+| `Media__MaxUploadBytes` | 20971520 | Photo upload size limit (photos are re-encoded to WebP ≤ 2000 px) |
 | `Storage__UploadsPath` | `data/uploads` | Upload directory (relative to the content root) |
 | `LegacyImport__DataPath` / `LegacyImport__UploadsPath` | empty | One-time import of the old JSON store / uploads |
 | `Serilog__MinimumLevel__Default` | `Information` | Log level (JSON logs to stdout in Production) |
@@ -111,5 +111,6 @@ without an explicit data-migration step. CI fails if the model has changes witho
 |---|---|---|
 | `API_INTERNAL_URL` | `http://localhost:5080` | Backend URL as seen by the Next.js server. **Read at build time** (rewrites) and runtime. |
 | `SESSION_COOKIE_NAME` | `almostafa_session` | Must match `Auth__CookieName` |
+| `SITE_URL` | `http://localhost:3000` | Public address used in `robots.txt` and `sitemap.xml` |
 
 The frontend holds no secrets and exposes no `NEXT_PUBLIC_*` variables.
