@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AlMostafa.API/AlMostafa.API.csproj" />
+    <Project Path="src/AlMostafa.Application/AlMostafa.Application.csproj" />
+    <Project Path="src/AlMostafa.Domain/AlMostafa.Domain.csproj" />
+    <Project Path="src/AlMostafa.Infrastructure/AlMostafa.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AlMostafa.IntegrationTests/AlMostafa.IntegrationTests.csproj" />
+    <Project Path="tests/AlMostafa.UnitTests/AlMostafa.UnitTests.csproj" />
+  </Folder>
+</Solution>
