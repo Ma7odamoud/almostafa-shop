@@ -58,6 +58,9 @@ ufw allow OpenSSH && ufw allow 80 && ufw allow 443 && ufw --force enable
 
 ## Step 5 — Download the shop
 
+First make sure the new version is merged into the `main` branch on GitHub (the pull request is merged).
+This command downloads `main`.
+
 The repository is private, so GitHub asks for your username and a **personal access token** as the password
 (GitHub → Settings → Developer settings → Personal access tokens → Fine-grained → read-only access to
 `almostafa-shop`).
