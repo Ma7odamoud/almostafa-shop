@@ -1,0 +1,9 @@
+bin/
+obj/
+*.user
+TestResults/
+# Runtime data: uploaded photos live outside git (back them up with the database).
+data/uploads/
+# Local overrides that may hold secrets
+appsettings.*.local.json
+data/originals/

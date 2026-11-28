@@ -1,115 +1,78 @@
-# Al-Mostafa — Project README
+# Al-Mostafa — المصطفى
 
-## Quick Start
+Fine fabrics and bespoke tailoring: a bilingual (Arabic / English) storefront with a private admin area.
 
-1. **Install dependencies**
-   ```bash
-   npm install
-   ```
+| Part | Tech | Folder |
+|---|---|---|
+| Frontend | Next.js 16, React 19, TypeScript | [`frontend/`](frontend) |
+| Backend API | ASP.NET Core (.NET 10), Clean Architecture, EF Core 10 | [`backend/`](backend) |
+| Database | PostgreSQL 16 | migrations in `backend/src/AlMostafa.Infrastructure/Persistence/Migrations` |
 
-2. **Configure environment**
-   Copy `.env.example` to `.env.local` and set your values:
-   ```bash
-   cp .env.example .env.local
-   ```
-   Then edit `.env.local`:
-   - `ADMIN_EMAIL` — your admin email
-   - `ADMIN_PASSWORD` — your admin password (plain text for now — see PRODUCTION NOTE)
-   - `JWT_SECRET` — a long random string (at least 32 characters)
+The Next.js app is frontend-only. All business logic, authentication, validation, persistence and file storage live in
+the ASP.NET Core API. The browser talks only to the Next.js origin, which proxies `/api/*` and `/uploads/*` to the API.
 
-3. **Run in development**
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000)
+## Quick start
 
-4. **Admin area**
-   Go to [http://localhost:3000/admin/login](http://localhost:3000/admin/login)
-   Sign in with the credentials you set in `.env.local`.
+Requirements: .NET SDK 10, Node.js 22, PostgreSQL 16 (user `postgres` / password `postgres` on localhost for the
+default development settings).
 
----
+Terminal 1 — API on http://localhost:5080 (API reference at `/docs`):
 
-## ⚠️ DEMO MODE — What needs to be confirmed
+```bash
+cd backend
+ADMIN_EMAIL=you@example.com ADMIN_PASSWORD='choose-a-password' dotnet run --project src/AlMostafa.API --launch-profile http
+```
+
+Terminal 2 — website on http://localhost:3000:
+
+```bash
+cd frontend
+npm ci
+npm run dev
+```
+
+Admin area: http://localhost:3000/admin/login (not linked from the customer navigation).
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md) — structure, modules, database, authentication flow, security, design decisions
+- [API reference](docs/API.md) — endpoints, request/response shapes, error codes
+- [Local development](docs/DEVELOPMENT.md) — setup, tests, environment variables, migrations, API type generation
+- [**Launch guide**](docs/LAUNCH.md) — put the shop online on one server, step by step
+- [Performance and data architecture](docs/PERFORMANCE.md) — measurements, indexes, caching, images, search
+- [Production deployment](docs/DEPLOYMENT.md) — topology, reverse proxy, migrations, importing the old JSON data
+
+## Tests
+
+```bash
+cd backend
+dotnet test
+```
+
+```bash
+cd frontend
+npm run lint
+npm run typecheck
+npm run build
+```
+
+CI (`.github/workflows/ci.yml`) runs all of the above plus contract checks (OpenAPI document and generated
+TypeScript types up to date, no un-migrated model changes).
+
+## Owner checklist before going live
 
 | Item | Status |
-|------|--------|
-| Real prices | Not set — set in admin panel |
-| Real stock | Not set — set in admin panel |
-| Real fabric photos | Not provided — upload in admin panel |
-| Payment methods | ⚠️ NOT DECIDED — owner to confirm |
-| Contact details | ⚠️ NOT PROVIDED — add to contact page |
-| Database (production) | ⚠️ Using local JSON file — choose real DB for live site |
-| File storage (production) | ⚠️ Using local disk — choose cloud storage for live site |
-| Admin password security | ⚠️ Plain text in .env — use hashed passwords for production |
-| Ivory shade | Proposal: #FFFFF0 — owner to confirm (change in globals.css) |
-| Website fonts | Using Cormorant Garamond + Amiri as proposal — owner to choose |
-| Size guide meterage | ⚠️ All zeros — owner must fill in lib/demoData.ts |
-| Minimum cut length | ⚠️ Not confirmed |
-| Fabric page structure | ⚠️ Browse + single-view on separate pages — owner to confirm |
-| Payment service | ⚠️ Not chosen — online payment needs a provider |
-
----
-
-## Project Structure
-
-```
-app/
-  page.tsx              — Home page
-  fabrics/
-    page.tsx            — Fabric browse + filter
-    [id]/page.tsx       — Single fabric view
-  cart/page.tsx         — Cart
-  payment/page.tsx      — Payment (demo)
-  contact/page.tsx      — Contact
-  admin/
-    login/page.tsx      — Admin login (not in customer nav)
-    page.tsx            — Admin dashboard
-    AdminDashboardClient.tsx
-    FabricForm.tsx
-  api/
-    fabrics/            — Public fabric API
-    orders/             — Order API (demo)
-    admin/
-      auth/             — Admin login/logout API
-      fabrics/          — Admin CRUD API
-      upload/           — Photo upload API
-      orders/           — Admin orders API
-components/
-  Providers.tsx         — Theme + Language + Cart context
-  Header.tsx
-  Footer.tsx
-  FabricCard.tsx
-  FilterSidebar.tsx
-  SizeGuideModal.tsx
-lib/
-  i18n.ts              — All UI translations (AR + EN)
-  demoData.ts          — Demo fabrics + size guide (OWNER: replace)
-  db.ts                — File-based demo database
-  auth.ts              — JWT auth helpers
-middleware.ts           — Admin route protection (server-side)
-data/
-  fabrics.json         — Generated on first run from demoData.ts
-  orders.json          — Generated on first order
-public/
-  logo-dark.jpg        — Dark theme logo
-  logo-light.jpg       — Light theme logo
-  uploads/             — Uploaded fabric photos (admin)
-```
-
----
-
-## Production Checklist (before going live)
-
-- [ ] Choose a real database (PostgreSQL/Supabase/MongoDB) and migrate data from `data/fabrics.json`
-- [ ] Choose cloud file storage (Cloudflare R2, AWS S3, Supabase Storage) for fabric photos
-- [ ] Choose a payment provider and implement real payment flow
-- [ ] Hash admin password (use bcrypt or Argon2 instead of plain text)
-- [ ] Set a strong random `JWT_SECRET`
-- [ ] Add real contact details to the contact page
-- [ ] Replace all demo fabric data with real products
-- [ ] Set real prices and stock for all fabrics
-- [ ] Fill in size guide meterage in `lib/demoData.ts`
-- [ ] Remove demo banners when moving to production
-- [ ] Configure email for the contact form
-- [ ] Set up SSL / HTTPS on the server
-- [ ] Add `noindex` protection for admin routes (already set)
+|---|---|
+| Real database | ✅ PostgreSQL with migrations — provision a production instance |
+| Hashed admin password | ✅ ASP.NET Core Identity (min. 8 characters, lockout after 5 failures) |
+| Server-side price calculation | ✅ Orders are priced by the API |
+| Real prices and stock | ⚠️ Set in the admin panel, shown in EGP (0 = "upon inquiry" / "by order") |
+| Real fabric photos and specifications | ⚠️ Upload photos and fill in composition / width / weight / season / care in the admin panel |
+| File storage | ⚠️ Local disk — back it up, or move to object storage for multiple servers |
+| Payment | ✅ Cash on delivery, mobile wallet, Visa — arranged by phone when confirming. Online card payment would need a provider (e.g. Paymob) |
+| Delivery | ✅ Cairo and Giza. ⚠️ Delivery fees not set yet — checkout says "confirmed by phone" |
+| Contact form e-mail | ⚠️ Still a `mailto:` link |
+| Size guide meterage | ⚠️ Confirm values in `frontend/src/features/catalog/data/size-guide.ts` |
+| Store phone / map link | ⚠️ Fill in `frontend/src/lib/constants/store.ts` |
+| Hero / showroom photos | ⚠️ Add `frontend/public/assets/hero/hero.jpg` and `frontend/public/assets/showroom/showroom.jpg` |
+| HTTPS + hosting | ✅ Ready: `deploy/` stack with automatic HTTPS and backups — follow [LAUNCH.md](docs/LAUNCH.md) |

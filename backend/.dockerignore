@@ -1,0 +1,7 @@
+**/bin/
+**/obj/
+**/TestResults/
+data/uploads/
+tests/
+openapi/
+.git
