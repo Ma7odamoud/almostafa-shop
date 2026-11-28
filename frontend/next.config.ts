@@ -23,9 +23,16 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
-    // Allow local uploads and placeholder images
+    // Optimises the site's own static images (hero, showroom, logos) into screen-sized WebP.
+    // Uploaded fabric photos are already resized by the API and are rendered with plain <img srcset>.
+    localPatterns: [
+      { pathname: "/assets/**", search: "" },
+      { pathname: "/logo*", search: "" },
+    ],
     remotePatterns: [],
-    unoptimized: true,
+    formats: ["image/webp"],
+    qualities: [75],
+    minimumCacheTTL: 2678400, // 31 days; the cache is rebuilt on every deployment anyway
   },
   // The browser only ever talks to this origin; Next.js proxies API calls and uploaded photos to the
   // backend. This keeps the session cookie first-party (SameSite=Strict) and avoids CORS entirely.

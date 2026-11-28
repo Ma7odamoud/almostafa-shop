@@ -117,12 +117,14 @@ fabrics (id PK varchar(64) e.g. "fab-001")
   color, color_label_ar/en, material, material_label_ar/en, pattern, pattern_label_ar/en,
   category, category_label_ar/en, photos jsonb [{src, alt}], hidden, created_at, updated_at,
   composition_ar/en, width_cm, weight_gsm, season, care_ar/en   (optional specifications)
-  idx: hidden, created_at
+  search_text (normalised, derived; GIN trigram index)
+  idx: created_at, search_text (trigram)
 
 orders (id PK varchar(64))                order_items (id PK identity)
   customer_name, customer_phone,     1──*   order_id FK → orders (cascade)
   customer_email, governorate, area,        fabric_id (indexed, no FK), fabric_name_ar/en,
-  shipping_address, payment_method,         meters numeric(10,2), price_per_meter numeric(12,2)
+  shipping_address, payment_method,         meters
+  idempotency_key (unique, partial), numeric(10,2), price_per_meter numeric(12,2)
 
 identity_users / identity_roles / identity_user_roles / … (ASP.NET Core Identity)
 data_protection_keys (keys that encrypt session cookies; shared across instances/restarts)
@@ -134,6 +136,8 @@ Business meanings preserved from the original app: `price_per_meter = 0` → "pr
 **Existing data** is imported by `LegacyDataImporter` on startup when `LegacyImport:DataPath` is set: fabrics only while
 the table is empty (ids and order preserved), orders by id (existing rows untouched), uploads copied without overwriting.
 Source files are only read. See [DEPLOYMENT.md](DEPLOYMENT.md#migrating-the-existing-production-data).
+
+Indexes, query patterns, caching and measured performance: see [PERFORMANCE.md](PERFORMANCE.md).
 
 ## 4. Authentication flow
 

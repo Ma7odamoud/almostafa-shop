@@ -101,7 +101,9 @@ without an explicit data-migration step. CI fails if the model has changes witho
 | `ForwardedHeaders__KnownProxies__0` / `ForwardedHeaders__KnownNetworks__0` | loopback only | Proxies allowed to set `X-Forwarded-For` |
 | `RateLimiting__GlobalPerMinute` / `LoginPerMinute` / `OrdersPerMinute` | 300 / 5 / 10 | Per-IP limits |
 | `Media__MaxUploadBytes` | 20971520 | Photo upload size limit (photos are re-encoded to WebP ≤ 2000 px) |
-| `Storage__UploadsPath` | `data/uploads` | Upload directory (relative to the content root) |
+| `Storage__UploadsPath` | `data/uploads` | Public photo directory (relative to the content root) |
+| `Storage__OriginalsPath` | `data/originals` | Private directory for untouched uploads (never served) |
+| `Database__SlowQueryMilliseconds` | `200` | Database commands slower than this are logged as warnings |
 | `LegacyImport__DataPath` / `LegacyImport__UploadsPath` | empty | One-time import of the old JSON store / uploads |
 | `Serilog__MinimumLevel__Default` | `Information` | Log level (JSON logs to stdout in Production) |
 

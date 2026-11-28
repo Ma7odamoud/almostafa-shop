@@ -39,6 +39,7 @@ Admin area: http://localhost:3000/admin/login (not linked from the customer navi
 - [API reference](docs/API.md) — endpoints, request/response shapes, error codes
 - [Local development](docs/DEVELOPMENT.md) — setup, tests, environment variables, migrations, API type generation
 - [**Launch guide**](docs/LAUNCH.md) — put the shop online on one server, step by step
+- [Performance and data architecture](docs/PERFORMANCE.md) — measurements, indexes, caching, images, search
 - [Production deployment](docs/DEPLOYMENT.md) — topology, reverse proxy, migrations, importing the old JSON data
 
 ## Tests

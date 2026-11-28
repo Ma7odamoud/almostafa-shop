@@ -23,8 +23,9 @@ export default async function Page() {
   }
   return (
     <>
-      {/* The hero is the largest element on arrival: fetch it before the CSS that references it. React hoists this into <head>. */}
-      <link rel="preload" as="image" href={heroSrc} fetchPriority="high" />
+      {/* The placeholder is a CSS background: preload it so it is fetched before the CSS that references it.
+          (A real hero photo is preloaded by next/image itself, at the right size.) */}
+      {heroSrc.endsWith(".svg") && <link rel="preload" as="image" href={heroSrc} fetchPriority="high" />}
       <HomePage initialFabrics={fabrics} heroSrc={heroSrc} showroomSrc={showroomSrc} />
     </>
   );

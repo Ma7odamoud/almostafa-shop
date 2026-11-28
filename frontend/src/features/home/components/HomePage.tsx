@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useLang, useTheme } from "@/lib/preferences/preferences";
 import { t } from "@/lib/i18n";
 import type { FabricSummary } from "@/features/catalog/types";
@@ -55,18 +56,24 @@ export default function HomePage({ initialFabrics, heroSrc, showroomSrc }: {
           backgroundColor: "#060910",
         }}
       >
-        {/* Full-bleed hero image background with fallback pattern */}
+        {/* Full-bleed hero. A real photo goes through the Next.js image optimizer (WebP sized to the screen,
+            loaded first); the bundled SVG placeholder is drawn as a plain background. */}
         <div
           style={{
             position: "absolute",
             inset: 0,
             zIndex: 1,
-            backgroundImage: `url('${heroSrc}')`,
+            backgroundImage: heroSrc.endsWith(".svg") ? `url('${heroSrc}')` : undefined,
             backgroundSize: "cover",
             backgroundPosition: "center top",
             backgroundRepeat: "no-repeat",
           }}
-        />
+        >
+          {!heroSrc.endsWith(".svg") && (
+            <Image src={heroSrc} alt="" fill preload sizes="100vw" quality={75}
+              style={{ objectFit: "cover", objectPosition: "center top" }} />
+          )}
+        </div>
 
         {/* Blue-Black gradient overlay adapted to the palette */}
         <div

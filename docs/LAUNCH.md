@@ -132,6 +132,13 @@ appears automatically within a minute (the certificate is free, from Let's Encry
 
 The shop starts with an empty catalogue. Add your fabrics before announcing the site.
 
+## Home page photos (hero and showroom)
+
+These two photos are part of the website itself, not the catalogue. Put them in the repository as
+`frontend/public/assets/hero/hero.jpg` and `frontend/public/assets/showroom/showroom.jpg` (or send them to your
+developer), push, then update the server (see *Everyday tasks*). The site resizes them automatically for each screen.
+They must be present when the site is built — a file copied onto a running server is not served.
+
 ## Step 9 — Turn on daily backups
 
 Run one backup by hand to check it works:
@@ -146,7 +153,7 @@ Then schedule it every night at 03:15:
 (crontab -l 2>/dev/null; echo "15 3 * * * cd /opt/almostafa-shop/deploy && ./backup.sh >> backups/backup.log 2>&1") | crontab -
 ```
 
-Backups are kept for 14 days in `deploy/backups/`. They live on the same server, so also keep the provider's
+Backups are kept for 14 days in `deploy/backups/` (database and web-ready photos daily; the large untouched originals weekly on Sundays, kept 30 days). They live on the same server, so also keep the provider's
 automatic server backups switched on, and now and then download a copy to your computer:
 
 ```bash

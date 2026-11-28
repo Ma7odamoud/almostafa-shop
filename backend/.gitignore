@@ -6,3 +6,4 @@ TestResults/
 data/uploads/
 # Local overrides that may hold secrets
 appsettings.*.local.json
+data/originals/
