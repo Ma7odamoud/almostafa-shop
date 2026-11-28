@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLang } from "@/lib/preferences/preferences";
 import { useCart } from "@/features/cart/cart-context";
 import { t } from "@/lib/i18n";
+import { formatPrice } from "@/lib/format";
 import { MinusIcon, PlusIcon } from "@/components/ui/Icons";
 
 export default function CartPage() {
@@ -86,14 +87,14 @@ export default function CartPage() {
                       </div>
                       {hasPrice && (
                         <span style={{ color: "var(--fg-muted)", fontSize: "0.82rem" }}>
-                          × {item.pricePerMeter.toFixed(2)}
+                          × {formatPrice(item.pricePerMeter, locale)}
                         </span>
                       )}
                     </div>
                   </div>
                   <div style={{ textAlign: "end" }}>
                     <p style={{ color: "var(--price)", fontSize: "1.1rem", fontWeight: 500, marginBottom: "0.5rem" }}>
-                      {hasPrice ? (item.meters * item.pricePerMeter).toFixed(2) : t(locale, "demoPrice")}
+                      {hasPrice ? formatPrice(item.meters * item.pricePerMeter, locale) : t(locale, "demoPrice")}
                     </p>
                     <button
                       onClick={() => removeItem(item.fabricId)}
@@ -120,13 +121,22 @@ export default function CartPage() {
 
           <div className="divider-gold" />
 
+          {/* Delivery */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", marginBottom: "0.75rem" }}>
+            <span style={{ color: "var(--fg-body)", fontSize: "0.95rem" }}>{t(locale, "deliveryFee")}</span>
+            <span style={{ color: "var(--fg-muted)", fontSize: "0.9rem" }}>{t(locale, "deliveryFeeTbc")}</span>
+          </div>
+
           {/* Total */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
             <span style={{ color: "var(--fg)", fontSize: "1.1rem" }}>{t(locale, "total")}</span>
             <span style={{ color: "var(--price)", fontSize: "1.3rem", fontWeight: 600 }}>
-              {total > 0 ? total.toFixed(2) : t(locale, "demoPrice")}
+              {total > 0 ? formatPrice(total, locale) : t(locale, "demoPrice")}
             </span>
           </div>
+          <p style={{ color: "var(--fg-muted)", fontSize: "0.82rem", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+            {t(locale, "deliveryNote")}
+          </p>
 
           <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end", flexWrap: "wrap" }}>
             <Link href="/fabrics" style={{

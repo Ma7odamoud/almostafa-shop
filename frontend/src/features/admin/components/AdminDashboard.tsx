@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/preferences/preferences";
 import { t } from "@/lib/i18n";
+import { formatPrice } from "@/lib/format";
 import type { Fabric } from "@/features/catalog/types";
 import { adminService, type Order } from "@/features/admin/services/admin";
 import { authService } from "@/features/auth/services/auth";
@@ -13,6 +14,13 @@ import FabricForm from "./FabricForm";
 type Tab = "fabrics" | "orders";
 
 const FABRICS_PAGE_SIZE = 100;
+
+const PAYMENT_LABELS: Record<string, string> = {
+  cod: "Cash on delivery",
+  wallet: "Mobile wallet",
+  card: "Visa / card",
+  "bank-transfer": "Bank transfer",
+};
 const ORDERS_PAGE_SIZE = 50;
 
 export default function AdminDashboard({ email }: { email: string }) {
@@ -27,6 +35,7 @@ export default function AdminDashboard({ email }: { email: string }) {
   const [error, setError] = useState("");
   const [editingFabric, setEditingFabric] = useState<Fabric | null>(null);
   const [addingNew, setAddingNew] = useState(false);
+  const [openOrder, setOpenOrder] = useState<string | null>(null);
 
   const handleError = useCallback((err: unknown) => {
     if (err instanceof ApiError && err.isUnauthorized) {
@@ -201,27 +210,67 @@ export default function AdminDashboard({ email }: { email: string }) {
           {orders.length === 0 ? (
             <p style={{ color: "var(--fg-muted)" }}>{t(locale, "adminNoOrders")}</p>
           ) : (
+            <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                  {["ID", "Name", "Total", "Payment", "Date", "Status"].map((h) => (
+                  {["Order", "Customer", "Phone", "Area", "Total", "Payment", "Date", ""].map((h) => (
                     <th key={h} style={th}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {orders.map((o) => (
-                  <tr key={o.id} style={{ borderBottom: "1px solid var(--border)" }}>
-                    <td style={td}>{o.id.slice(0, 12)}…</td>
-                    <td style={td}>{o.name}</td>
-                    <td style={td}>{o.total > 0 ? o.total.toFixed(2) : "—"}</td>
-                    <td style={td}>{o.paymentMethod}</td>
-                    <td style={td}>{new Date(o.createdAt).toLocaleDateString()}</td>
-                    <td style={{ ...td, color: "#ffa040" }}>{o.status}</td>
-                  </tr>
-                ))}
+                {orders.map((o) => {
+                  const open = openOrder === o.id;
+                  return (
+                    <React.Fragment key={o.id}>
+                      <tr style={{ borderBottom: open ? "none" : "1px solid var(--border)" }}>
+                        <td style={{ ...td, direction: "ltr", whiteSpace: "nowrap" }}>{o.id}</td>
+                        <td style={td}>{o.name}</td>
+                        <td style={{ ...td, direction: "ltr", whiteSpace: "nowrap" }}>
+                          {o.phone ? <a href={`tel:${o.phone}`} style={{ color: "var(--fg-body)" }}>{o.phone}</a> : "—"}
+                        </td>
+                        <td style={td}>{[o.area, o.governorateLabel?.en].filter(Boolean).join(", ") || "—"}</td>
+                        <td style={{ ...td, whiteSpace: "nowrap" }}>{o.total > 0 ? formatPrice(o.total, "en") : "—"}</td>
+                        <td style={td}>{PAYMENT_LABELS[o.paymentMethod] ?? o.paymentMethod}</td>
+                        <td style={{ ...td, whiteSpace: "nowrap" }}>{new Date(o.createdAt).toLocaleDateString()}</td>
+                        <td style={td}>
+                          <button onClick={() => setOpenOrder(open ? null : o.id)} style={smallBtn} aria-expanded={open}>
+                            {open ? "Hide" : "Details"}
+                          </button>
+                        </td>
+                      </tr>
+                      {open && (
+                        <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                          <td colSpan={8} style={{ ...td, paddingTop: 0 }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1rem 2rem", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "1rem" }}>
+                              <div>
+                                <p style={detailLabel}>Delivery address</p>
+                                <p style={{ whiteSpace: "pre-wrap" }}>{o.address || "—"}</p>
+                                <p style={{ color: "var(--fg-muted)", marginTop: "0.25rem" }}>{[o.area, o.governorateLabel?.en].filter(Boolean).join(", ")}</p>
+                                {o.email && <p style={{ marginTop: "0.5rem", direction: "ltr" }}>{o.email}</p>}
+                                <p style={{ ...detailLabel, marginTop: "0.75rem" }}>Status</p>
+                                <p style={{ color: "#ffa040" }}>{o.status}</p>
+                              </div>
+                              <div>
+                                <p style={detailLabel}>Fabrics</p>
+                                {o.items.map((i) => (
+                                  <div key={i.fabricId} style={{ display: "flex", justifyContent: "space-between", gap: "1rem", padding: "0.3rem 0", borderBottom: "1px solid var(--border)" }}>
+                                    <span>{i.fabricNameEn || i.fabricNameAr} <span style={{ color: "var(--fg-muted)" }}>· {i.meters} m</span></span>
+                                    <span style={{ whiteSpace: "nowrap" }}>{i.lineTotal > 0 ? formatPrice(i.lineTotal, "en") : "On inquiry"}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </tbody>
             </table>
+            </div>
           )}
           <Pager {...orderPage} onPage={loadOrders} />
         </div>
@@ -241,6 +290,14 @@ function Pager({ page, totalPages, onPage }: { page: number; totalPages: number;
     </div>
   );
 }
+
+const detailLabel: React.CSSProperties = {
+  color: "var(--fg-muted)",
+  fontSize: "0.7rem",
+  textTransform: "uppercase",
+  letterSpacing: "0.07em",
+  marginBottom: "0.3rem",
+};
 
 const th: React.CSSProperties = {
   textAlign: "start",

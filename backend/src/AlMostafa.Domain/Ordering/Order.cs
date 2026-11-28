@@ -11,6 +11,8 @@ public sealed class Order
     public const int MaxIdLength = 64;
     public const int MaxNameLength = 200;
     public const int MaxAddressLength = 1000;
+    public const int MaxEmailLength = 256;
+    public const int MaxAreaLength = 100;
     public const int MaxItems = 50;
 
     private readonly List<OrderItem> _items = [];
@@ -20,12 +22,21 @@ public sealed class Order
     {
         Id = string.Empty;
         CustomerName = string.Empty;
+        CustomerPhone = string.Empty;
+        Governorate = string.Empty;
+        Area = string.Empty;
         ShippingAddress = string.Empty;
         PaymentMethod = string.Empty;
     }
 
     public string Id { get; private set; }
     public string CustomerName { get; private set; }
+
+    /// <summary>Egyptian mobile in +201XXXXXXXXX form. Empty only on orders imported from the old store.</summary>
+    public string CustomerPhone { get; private set; }
+    public string? CustomerEmail { get; private set; }
+    public string Governorate { get; private set; }
+    public string Area { get; private set; }
     public string ShippingAddress { get; private set; }
     public string PaymentMethod { get; private set; }
     public OrderStatus Status { get; private set; }
@@ -33,19 +44,19 @@ public sealed class Order
     public DateTimeOffset CreatedAt { get; private set; }
     public IReadOnlyList<OrderItem> Items => _items;
 
-    public static Order Place(
-        string id,
-        string customerName,
-        string shippingAddress,
-        string paymentMethod,
-        IEnumerable<OrderLine> lines,
-        DateTimeOffset now)
+    public static Order Place(string id, OrderCustomer customer, string paymentMethod, IEnumerable<OrderLine> lines, DateTimeOffset now)
     {
+        ArgumentNullException.ThrowIfNull(customer);
+
         var order = new Order
         {
             Id = id,
-            CustomerName = Guard.Text(customerName, MaxNameLength, "name"),
-            ShippingAddress = Guard.Text(shippingAddress, MaxAddressLength, "address"),
+            CustomerName = Guard.Text(customer.Name, MaxNameLength, "name"),
+            CustomerPhone = EgyptianMobile.Normalize(customer.Phone),
+            CustomerEmail = NormalizeEmail(customer.Email),
+            Governorate = DeliveryAreas.Normalize(customer.Governorate),
+            Area = Guard.Text(customer.Area, MaxAreaLength, "area"),
+            ShippingAddress = Guard.Text(customer.Address, MaxAddressLength, "address"),
             PaymentMethod = PaymentMethods.Normalize(paymentMethod),
             Status = OrderStatus.Pending,
             CreatedAt = now,
@@ -53,6 +64,8 @@ public sealed class Order
 
         if (order.CustomerName.Length == 0)
             throw new DomainException("name_required", "Name is required.");
+        if (order.Area.Length == 0)
+            throw new DomainException("area_required", "Area is required.");
         if (order.ShippingAddress.Length == 0)
             throw new DomainException("address_required", "Address is required.");
 
@@ -90,6 +103,16 @@ public sealed class Order
         return order;
     }
 
+    private static string? NormalizeEmail(string? email)
+    {
+        var value = (email ?? string.Empty).Trim();
+        if (value.Length == 0) return null;
+        var at = value.IndexOf('@', StringComparison.Ordinal);
+        if (value.Length > MaxEmailLength || at <= 0 || at != value.LastIndexOf('@') || !value[(at + 1)..].Contains('.', StringComparison.Ordinal))
+            throw new DomainException("invalid_email", "Please enter a valid email address or leave it empty.");
+        return value;
+    }
+
     private void AddLine(OrderLine line)
     {
         if (_items.Count >= MaxItems)
@@ -101,6 +124,9 @@ public sealed class Order
         Total = _items.Sum(i => i.LineTotal);
     }
 }
+
+/// <summary>Who the order is for and where it goes. Phone is required: every order is confirmed by phone.</summary>
+public sealed record OrderCustomer(string? Name, string? Phone, string? Email, string? Governorate, string? Area, string? Address);
 
 /// <summary>Input for an order line, already priced from the catalogue.</summary>
 public sealed record OrderLine(string FabricId, LocalizedText FabricName, decimal Meters, decimal PricePerMeter);

@@ -198,6 +198,59 @@ namespace AlMostafa.Infrastructure.Persistence.Migrations
                                 });
                         });
 
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Specifications", "AlMostafa.Domain.Catalog.Fabric.Specifications#FabricSpecifications", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Season")
+                                .HasMaxLength(32)
+                                .HasColumnType("character varying(32)")
+                                .HasColumnName("season");
+
+                            b1.Property<int?>("WeightGsm")
+                                .HasColumnType("integer")
+                                .HasColumnName("weight_gsm");
+
+                            b1.Property<decimal?>("WidthCm")
+                                .HasPrecision(5, 1)
+                                .HasColumnType("numeric(5,1)")
+                                .HasColumnName("width_cm");
+
+                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Care", "AlMostafa.Domain.Catalog.Fabric.Specifications#FabricSpecifications.Care#LocalizedText", b2 =>
+                                {
+                                    b2.IsRequired();
+
+                                    b2.Property<string>("Ar")
+                                        .IsRequired()
+                                        .HasMaxLength(200)
+                                        .HasColumnType("character varying(200)")
+                                        .HasColumnName("care_ar");
+
+                                    b2.Property<string>("En")
+                                        .IsRequired()
+                                        .HasMaxLength(200)
+                                        .HasColumnType("character varying(200)")
+                                        .HasColumnName("care_en");
+                                });
+
+                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Composition", "AlMostafa.Domain.Catalog.Fabric.Specifications#FabricSpecifications.Composition#LocalizedText", b2 =>
+                                {
+                                    b2.IsRequired();
+
+                                    b2.Property<string>("Ar")
+                                        .IsRequired()
+                                        .HasMaxLength(200)
+                                        .HasColumnType("character varying(200)")
+                                        .HasColumnName("composition_ar");
+
+                                    b2.Property<string>("En")
+                                        .IsRequired()
+                                        .HasMaxLength(200)
+                                        .HasColumnType("character varying(200)")
+                                        .HasColumnName("composition_en");
+                                });
+                        });
+
                     b.ComplexCollection(typeof(List<Dictionary<string, object>>), "_photos", "AlMostafa.Domain.Catalog.Fabric._photos#FabricPhoto", b1 =>
                         {
                             b1.IsRequired();
@@ -232,15 +285,38 @@ namespace AlMostafa.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(64)")
                         .HasColumnName("id");
 
+                    b.Property<string>("Area")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("area");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("CustomerEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("customer_email");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
                         .HasColumnName("customer_name");
+
+                    b.Property<string>("CustomerPhone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("customer_phone");
+
+                    b.Property<string>("Governorate")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("governorate");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()

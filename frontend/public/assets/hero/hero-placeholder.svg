@@ -38,6 +38,4 @@
   </g>
 
   <!-- Notice -->
-  <text x="400" y="850" fill="#c9a84c" text-anchor="middle" font-size="16" font-family="'Tajawal', sans-serif" opacity="0.8">⚠️ صورة نموذج تجريبي — استبدلها بصورة البدل والتفصيل</text>
-  <text x="400" y="880" fill="#8fa0b8" text-anchor="middle" font-size="13" font-family="sans-serif" opacity="0.7">Place hero.jpg in /public/assets/hero/</text>
 </svg>

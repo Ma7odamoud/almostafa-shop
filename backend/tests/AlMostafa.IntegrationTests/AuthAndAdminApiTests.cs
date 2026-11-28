@@ -75,7 +75,9 @@ public class AuthAndAdminApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         Assert.StartsWith("fab-", id, StringComparison.Ordinal);
         Assert.Equal(HttpStatusCode.OK, (await anonymous.GetAsync($"/api/v1/fabrics/{id}", ct)).StatusCode);
 
-        var updated = await (await admin.PutAsJsonAsync($"/api/v1/admin/fabrics/{id}", TestHelpers.NewFabric("Renamed", 75m), ct)).JsonAsync();
+        var updated = await (await admin.PutAsJsonAsync($"/api/v1/admin/fabrics/{id}", TestHelpers.NewFabricWithSpecs("Renamed", 75m), ct)).JsonAsync();
+        Assert.Equal(150m, updated.GetProperty("widthCm").GetDecimal());
+        Assert.Equal("Autumn / Winter", updated.GetProperty("seasonLabel").GetProperty("en").GetString());
         Assert.Equal("Renamed", updated.GetProperty("nameEn").GetString());
         Assert.Equal(75m, updated.GetProperty("pricePerMeter").GetDecimal());
 
@@ -148,7 +150,7 @@ public class AuthAndAdminApiTests(ApiFactory factory) : IClassFixture<ApiFactory
         var ct = TestContext.Current.CancellationToken;
         var anonymous = factory.CreateClient();
         foreach (var name in new[] { "First", "Second" })
-            (await anonymous.PostAsJsonAsync("/api/v1/orders", new { items = new[] { new { fabricId = "fab-001", meters = 1m } }, name, address = "x", paymentMethod = "cod" }, ct)).EnsureSuccessStatusCode();
+            (await anonymous.PostAsJsonAsync("/api/v1/orders", new { items = new[] { new { fabricId = "fab-001", meters = 1m } }, name, phone = "01112345678", governorate = "cairo", area = "Maadi", address = "x", paymentMethod = "cod" }, ct)).EnsureSuccessStatusCode();
 
         var admin = await factory.CreateAdminClientAsync();
         var body = await (await admin.GetAsync("/api/v1/admin/orders", ct)).JsonAsync();
@@ -156,6 +158,8 @@ public class AuthAndAdminApiTests(ApiFactory factory) : IClassFixture<ApiFactory
 
         Assert.True(names.IndexOf("Second") < names.IndexOf("First"));
         Assert.Equal("pending", body.GetProperty("items")[0].GetProperty("status").GetString());
+        Assert.Equal("+201112345678", body.GetProperty("items")[0].GetProperty("phone").GetString());
+        Assert.Equal("Cairo", body.GetProperty("items")[0].GetProperty("governorateLabel").GetProperty("en").GetString());
     }
 
     [Fact]

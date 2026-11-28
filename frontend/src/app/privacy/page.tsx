@@ -20,8 +20,8 @@ export default function PrivacyPage() {
           </h2>
           <p style={{ color: "var(--fg-muted)" }}>
             {isAr
-              ? "نجمع فقط البيانات اللازمة لإتمام طلبات الأقمشة أو حجوزات التفصيل (مثل الاسم، عنوان التوصيل، والبريد الإلكتروني) ولا نشاركها مع أي طرف ثالث غير مرتبط بالتوصيل."
-              : "We only collect the information necessary to fulfill your fabric orders or tailoring appointments (such as name, delivery address, and email) and never share it with unrelated third parties."}
+              ? "نجمع فقط البيانات اللازمة لإتمام طلبات الأقمشة أو حجوزات التفصيل (مثل الاسم، رقم الموبايل، عنوان التوصيل، والبريد الإلكتروني إن وُجد) ولا نشاركها مع أي طرف ثالث غير مرتبط بالتوصيل."
+              : "We only collect the information necessary to fulfill your fabric orders or tailoring appointments (such as name, mobile number, delivery address, and email if provided) and never share it with unrelated third parties."}
           </p>
         </section>
 

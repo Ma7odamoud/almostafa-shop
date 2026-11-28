@@ -57,28 +57,6 @@
 }
 
 /* ── APERCU FONTS (Unresolved dependency: place licensed woff2 files in /public/fonts/apercu/) ── */
-@font-face {
-  font-family: 'Apercu';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/apercu/Apercu-Regular.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Apercu';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('/fonts/apercu/Apercu-Medium.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Apercu';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/fonts/apercu/Apercu-Bold.woff2') format('woff2');
-}
-
 /* ==========================================================
    THEME PALETTE VARIABLES
    ========================================================== */
@@ -129,7 +107,7 @@
 
   /* ── FONT FAMILIES ─────────────────────────────────────── */
   --font-ar: 'Tajawal', sans-serif;
-  --font-en: 'Apercu', 'Cormorant Garamond', 'Amiri', Georgia, serif;
+  --font-en: 'Cormorant Garamond', 'Amiri', Georgia, serif;
 
   /* ── CONCRETE SIZE SCALE (Mobile defaults: measured at 390px) ── */
   --fs-hero: 32px;

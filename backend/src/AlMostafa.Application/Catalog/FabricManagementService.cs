@@ -94,5 +94,11 @@ public sealed class FabricManagementService(
         r.Pattern ?? string.Empty,
         r.Category ?? string.Empty,
         [.. (r.Photos ?? []).Select(p => new FabricPhoto(p.Src, p.Alt))],
-        r.Hidden);
+        r.Hidden,
+        new FabricSpecifications(
+            new LocalizedText(r.CompositionAr, r.CompositionEn),
+            r.WidthCm,
+            r.WeightGsm,
+            r.Season,
+            new LocalizedText(r.CareAr, r.CareEn)));
 }

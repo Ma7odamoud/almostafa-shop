@@ -40,4 +40,25 @@ internal static class TestHelpers
         photos = new[] { new { src = "/uploads/x.jpg", alt = "x" } },
         hidden,
     };
+
+    public static object NewFabricWithSpecs(string nameEn, decimal price) => new
+    {
+        nameAr = "حرير",
+        nameEn,
+        pricePerMeter = price,
+        stockMeters = 0,
+        color = "ivory",
+        colorLabel = new { ar = "عاجي", en = "Ivory" },
+        material = "silk",
+        materialLabel = new { ar = "حرير", en = "Silk" },
+        pattern = "plain",
+        category = "suit",
+        photos = Array.Empty<object>(),
+        hidden = false,
+        compositionEn = "100% Silk",
+        widthCm = 150,
+        weightGsm = 240,
+        season = "autumn-winter",
+        careEn = "Dry clean only",
+    };
 }

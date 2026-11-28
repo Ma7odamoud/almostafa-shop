@@ -222,6 +222,27 @@
         }
       }
     },
+    "/api/v1/orders/options": {
+      "get": {
+        "tags": [
+          "Ordering"
+        ],
+        "summary": "Delivery governorates and payment methods offered at checkout.",
+        "operationId": "GetCheckoutOptions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutOptionsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "tags": [
@@ -914,6 +935,46 @@
   },
   "components": {
     "schemas": {
+      "CheckoutChoiceDto": {
+        "required": [
+          "value",
+          "labelAr",
+          "labelEn"
+        ],
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "labelAr": {
+            "type": "string"
+          },
+          "labelEn": {
+            "type": "string"
+          }
+        }
+      },
+      "CheckoutOptionsDto": {
+        "required": [
+          "governorates",
+          "paymentMethods"
+        ],
+        "type": "object",
+        "properties": {
+          "governorates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CheckoutChoiceDto"
+            }
+          },
+          "paymentMethods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CheckoutChoiceDto"
+            }
+          }
+        }
+      },
       "CsrfTokenDto": {
         "required": [
           "token",
@@ -966,7 +1027,15 @@
           "categoryLabel",
           "photos",
           "hidden",
-          "updatedAt"
+          "updatedAt",
+          "compositionAr",
+          "compositionEn",
+          "widthCm",
+          "weightGsm",
+          "season",
+          "seasonLabel",
+          "careAr",
+          "careEn"
         ],
         "type": "object",
         "properties": {
@@ -1029,6 +1098,48 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "compositionAr": {
+            "type": "string"
+          },
+          "compositionEn": {
+            "type": "string"
+          },
+          "widthCm": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "format": "double"
+          },
+          "weightGsm": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "season": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "seasonLabel": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LocalizedTextDto"
+              }
+            ]
+          },
+          "careAr": {
+            "type": "string"
+          },
+          "careEn": {
+            "type": "string"
           }
         }
       },
@@ -1211,6 +1322,11 @@
         "required": [
           "id",
           "name",
+          "phone",
+          "email",
+          "governorate",
+          "governorateLabel",
+          "area",
           "address",
           "paymentMethod",
           "status",
@@ -1224,6 +1340,31 @@
             "type": "string"
           },
           "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "governorate": {
+            "type": "string"
+          },
+          "governorateLabel": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LocalizedTextDto"
+              }
+            ]
+          },
+          "area": {
             "type": "string"
           },
           "address": {
@@ -1371,6 +1512,10 @@
         "required": [
           "items",
           "name",
+          "phone",
+          "email",
+          "governorate",
+          "area",
           "address",
           "paymentMethod"
         ],
@@ -1386,6 +1531,30 @@
             }
           },
           "name": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "phone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "governorate": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "area": {
             "type": [
               "null",
               "string"
@@ -1569,6 +1738,50 @@
           },
           "hidden": {
             "type": "boolean"
+          },
+          "compositionAr": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "compositionEn": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "widthCm": {
+            "type": [
+              "null",
+              "number"
+            ],
+            "format": "double"
+          },
+          "weightGsm": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "season": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "careAr": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "careEn": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       }

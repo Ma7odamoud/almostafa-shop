@@ -3,6 +3,7 @@ import React from "react";
 import Link from "next/link";
 import { useLang } from "@/lib/preferences/preferences";
 import { t } from "@/lib/i18n";
+import { formatPrice } from "@/lib/format";
 import type { Fabric } from "@/features/catalog/types";
 
 interface Props {
@@ -125,7 +126,7 @@ export default function FabricCard({ fabric }: Props) {
             }}
           >
             {hasPrice
-              ? `${fabric.pricePerMeter.toFixed(2)} — ${t(locale, "pricePerMeter")}`
+              ? `${formatPrice(fabric.pricePerMeter, locale)} — ${t(locale, "pricePerMeter")}`
               : t(locale, "demoPrice")}
           </p>
         </div>

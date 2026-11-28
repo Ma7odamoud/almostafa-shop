@@ -20,7 +20,23 @@ const EMPTY_FABRIC: FabricFormState = {
   category: "suit", categoryLabel: { ar: "بدلة", en: "Suit" },
   photos: [],
   hidden: false,
+  seasonLabel: null,
+  compositionAr: "", compositionEn: "",
+  widthCm: null, weightGsm: null, season: null,
+  careAr: "", careEn: "",
 };
+
+// Codes must match the backend's FabricTaxonomy.Seasons.
+const SEASONS = [
+  { value: "all-season", ar: "طوال العام", en: "All Seasons" },
+  { value: "spring-summer", ar: "ربيعي / صيفي", en: "Spring / Summer" },
+  { value: "autumn-winter", ar: "خريفي / شتوي", en: "Autumn / Winter" },
+];
+
+/** "" -> null so an empty input means "not specified". */
+function toNumberOrNull(value: string): number | null {
+  return value.trim() === "" ? null : Number(value);
+}
 
 const PATTERNS = [
   { value: "plain", ar: "سادة", en: "Plain" },
@@ -93,6 +109,9 @@ export default function FabricForm({ fabric, onCancel, onSaved }: Props) {
       material: form.material, materialLabel: form.materialLabel,
       pattern: form.pattern, category: form.category,
       photos: form.photos, hidden: form.hidden,
+      compositionAr: form.compositionAr, compositionEn: form.compositionEn,
+      widthCm: form.widthCm, weightGsm: form.weightGsm, season: form.season,
+      careAr: form.careAr, careEn: form.careEn,
     };
     try {
       if (fabric) await adminService.updateFabric(fabric.id, payload);
@@ -195,6 +214,37 @@ export default function FabricForm({ fabric, onCancel, onSaved }: Props) {
                 <Field label="التسمية AR" value={form.materialLabel.ar} onChange={(v) => set("materialLabel", { ...form.materialLabel, ar: v })} dir="rtl" />
               </Row>
             </div>
+          </Row>
+        </Section>
+
+        {/* Specifications — shown on the product page only when filled in */}
+        <Section label="Specifications (optional — leave empty if unknown)">
+          <Row>
+            <Field label="Composition (e.g. 100% Wool, Super 120s)" value={form.compositionEn} onChange={(v) => set("compositionEn", v)} />
+            <Field label="التركيب" value={form.compositionAr} onChange={(v) => set("compositionAr", v)} dir="rtl" />
+          </Row>
+          <Row>
+            <div>
+              <label style={labelStyle}>Width (cm)</label>
+              <input type="number" min={50} max={400} step={1} value={form.widthCm ?? ""}
+                onChange={(e) => set("widthCm", toNumberOrNull(e.target.value))} style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Weight (g per metre)</label>
+              <input type="number" min={50} max={1500} step={1} value={form.weightGsm ?? ""}
+                onChange={(e) => set("weightGsm", toNumberOrNull(e.target.value))} style={inputStyle} />
+            </div>
+          </Row>
+          <div>
+            <label style={labelStyle}>Season</label>
+            <select value={form.season ?? ""} onChange={(e) => set("season", e.target.value || null)} style={inputStyle}>
+              <option value="">Not specified</option>
+              {SEASONS.map((x) => <option key={x.value} value={x.value}>{x.en} — {x.ar}</option>)}
+            </select>
+          </div>
+          <Row>
+            <Field label="Care (e.g. Dry clean only)" value={form.careEn} onChange={(v) => set("careEn", v)} />
+            <Field label="العناية" value={form.careAr} onChange={(v) => set("careAr", v)} dir="rtl" />
           </Row>
         </Section>
 

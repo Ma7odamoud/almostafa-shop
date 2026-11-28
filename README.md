@@ -64,12 +64,13 @@ TypeScript types up to date, no un-migrated model changes).
 | Real database | ✅ PostgreSQL with migrations — provision a production instance |
 | Hashed admin password | ✅ ASP.NET Core Identity (min. 8 characters, lockout after 5 failures) |
 | Server-side price calculation | ✅ Orders are priced by the API |
-| Real prices and stock | ⚠️ Set in the admin panel (0 = "upon inquiry" / "by order") |
-| Real fabric photos | ⚠️ Upload in the admin panel |
+| Real prices and stock | ⚠️ Set in the admin panel, shown in EGP (0 = "upon inquiry" / "by order") |
+| Real fabric photos and specifications | ⚠️ Upload photos and fill in composition / width / weight / season / care in the admin panel |
 | File storage | ⚠️ Local disk — back it up, or move to object storage for multiple servers |
-| Payment provider | ⚠️ Not chosen — orders are recorded as `pending`, no online payment |
+| Payment | ✅ Cash on delivery, mobile wallet, Visa — arranged by phone when confirming. Online card payment would need a provider (e.g. Paymob) |
+| Delivery | ✅ Cairo and Giza. ⚠️ Delivery fees not set yet — checkout says "confirmed by phone" |
 | Contact form e-mail | ⚠️ Still a `mailto:` link |
 | Size guide meterage | ⚠️ Confirm values in `frontend/src/features/catalog/data/size-guide.ts` |
 | Store phone / map link | ⚠️ Fill in `frontend/src/lib/constants/store.ts` |
-| Hero / showroom images, Apercu font | ⚠️ Files referenced but not in the repo (see `frontend/public/assets/*/README.md`) |
+| Hero / showroom photos | ⚠️ Add `frontend/public/assets/hero/hero.jpg` and `frontend/public/assets/showroom/showroom.jpg` |
 | HTTPS + reverse proxy | ⚠️ Required — see [deployment](docs/DEPLOYMENT.md) |

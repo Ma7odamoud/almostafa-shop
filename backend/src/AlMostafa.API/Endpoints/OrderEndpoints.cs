@@ -18,6 +18,11 @@ internal static class OrderEndpoints
             .ProducesProblem(StatusCodes.Status429TooManyRequests)
             .RequireRateLimiting(ApiConventions.OrdersRateLimit);
 
+        api.MapGet("/orders/options", Ok<CheckoutOptionsDto> () => TypedResults.Ok(OrderService.GetCheckoutOptions()))
+            .WithTags("Ordering")
+            .WithName("GetCheckoutOptions")
+            .WithSummary("Delivery governorates and payment methods offered at checkout.");
+
         return api;
     }
 }

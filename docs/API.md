@@ -12,7 +12,8 @@ The machine-readable contract is [`backend/openapi/almostafa-api.json`](../backe
 | GET | `/fabrics` | Visible fabrics. Query: `search`, `colors[]`, `patterns[]`, `materials[]`, `categories[]` (repeat the key for several values), `sort` = `default`\|`newest`\|`name`\|`priceAsc`\|`priceDesc`, `page` (≥1), `pageSize` (1–100, default 24) | 200 `PagedResult<FabricDto>` |
 | GET | `/fabrics/facets` | Distinct colour / pattern / material values among visible fabrics, plus the 4 categories | 200 `FabricFacetsDto` |
 | GET | `/fabrics/{id}` | One visible fabric | 200 `FabricDto`, 404 |
-| POST | `/orders` | Place an order. Body: `{ items: [{ fabricId, meters }], name, address, paymentMethod: "cod"\|"bank-transfer"\|"card" }`. Prices and total are computed by the server. Rate-limited. | 201 `{ orderId, total, createdAt }`, 400, 409 `fabric_unavailable`, 429 |
+| GET | `/orders/options` | Delivery governorates (`cairo`, `giza`) and payment methods (`cod`, `wallet`, `card`) with Arabic/English labels | 200 `CheckoutOptionsDto` |
+| POST | `/orders` | Place an order. Body: `{ items: [{ fabricId, meters }], name, phone, email?, governorate, area, address, paymentMethod }`. `phone` must be an Egyptian mobile (010/011/012/015; Arabic digits and +20 accepted) and is stored as `+201XXXXXXXXX`. Prices and total are computed by the server; delivery fee is confirmed by phone. Rate-limited. | 201 `{ orderId, total, createdAt }`, 400, 409 `fabric_unavailable`, 429 |
 
 `PagedResult<T>` = `{ items: T[], page, pageSize, totalCount, totalPages }`.
 
@@ -50,7 +51,13 @@ The machine-readable contract is [`backend/openapi/almostafa-api.json`](../backe
   "pattern": "plain",                             // plain | checks | stripes | other (label is server-owned)
   "category": "suit",                             // suit | jacket | trousers | coat (label is server-owned)
   "photos": [{ "src": "/uploads/abc.jpg", "alt": "…" }],   // ≤ 12, site-relative paths only
-  "hidden": false
+  "hidden": false,
+  // Optional specifications — shown on the product page only when filled in:
+  "compositionAr": "", "compositionEn": "100% Wool, Super 120s",
+  "widthCm": 150,                                 // 50–400
+  "weightGsm": 260,                               // grams per metre, 50–1500
+  "season": "autumn-winter",                      // all-season | spring-summer | autumn-winter
+  "careAr": "", "careEn": "Dry clean only"
 }
 ```
 

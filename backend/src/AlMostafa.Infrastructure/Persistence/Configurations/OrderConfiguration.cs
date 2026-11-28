@@ -12,6 +12,10 @@ internal sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         b.HasKey(o => o.Id);
         b.Property(o => o.Id).HasMaxLength(Order.MaxIdLength);
         b.Property(o => o.CustomerName).HasMaxLength(Order.MaxNameLength).IsRequired();
+        b.Property(o => o.CustomerPhone).HasMaxLength(20).IsRequired();
+        b.Property(o => o.CustomerEmail).HasMaxLength(Order.MaxEmailLength);
+        b.Property(o => o.Governorate).HasMaxLength(32).IsRequired();
+        b.Property(o => o.Area).HasMaxLength(Order.MaxAreaLength).IsRequired();
         b.Property(o => o.ShippingAddress).HasMaxLength(Order.MaxAddressLength).IsRequired();
         b.Property(o => o.PaymentMethod).HasMaxLength(32).IsRequired();
         b.Property(o => o.Status).HasConversion<string>().HasMaxLength(32);

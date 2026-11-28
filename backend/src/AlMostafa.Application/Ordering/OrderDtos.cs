@@ -1,3 +1,4 @@
+using AlMostafa.Application.Common;
 using AlMostafa.Domain.Ordering;
 
 namespace AlMostafa.Application.Ordering;
@@ -9,6 +10,10 @@ namespace AlMostafa.Application.Ordering;
 public sealed record PlaceOrderRequest(
     IReadOnlyList<PlaceOrderItem>? Items,
     string? Name,
+    string? Phone,
+    string? Email,
+    string? Governorate,
+    string? Area,
     string? Address,
     string? PaymentMethod);
 
@@ -19,6 +24,11 @@ public sealed record OrderConfirmationDto(string OrderId, decimal Total, DateTim
 public sealed record OrderDto(
     string Id,
     string Name,
+    string Phone,
+    string? Email,
+    string Governorate,
+    LocalizedTextDto? GovernorateLabel,
+    string Area,
     string Address,
     string PaymentMethod,
     string Status,
@@ -29,6 +39,11 @@ public sealed record OrderDto(
     public static OrderDto From(Order o) => new(
         o.Id,
         o.CustomerName,
+        o.CustomerPhone,
+        o.CustomerEmail,
+        o.Governorate,
+        DeliveryAreas.Governorates.FirstOrDefault(g => g.Code == o.Governorate) is { } g ? LocalizedTextDto.From(g.Label) : null,
+        o.Area,
         o.ShippingAddress,
         o.PaymentMethod,
         o.Status.ToString().ToLowerInvariant(),
@@ -44,3 +59,10 @@ public sealed record OrderItemDto(
     decimal Meters,
     decimal PricePerMeter,
     decimal LineTotal);
+
+/// <summary>Choices offered at checkout, owned by the backend so the storefront never hard-codes them.</summary>
+public sealed record CheckoutOptionsDto(
+    IReadOnlyList<CheckoutChoiceDto> Governorates,
+    IReadOnlyList<CheckoutChoiceDto> PaymentMethods);
+
+public sealed record CheckoutChoiceDto(string Value, string LabelAr, string LabelEn);

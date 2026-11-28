@@ -24,6 +24,15 @@ public static class FabricTaxonomy
         new("coat", new LocalizedText("معطف", "Coat")),
     ];
 
+    public static IReadOnlyList<FabricAttribute> Seasons { get; } =
+    [
+        new("all-season", new LocalizedText("طوال العام", "All Seasons")),
+        new("spring-summer", new LocalizedText("ربيعي / صيفي", "Spring / Summer")),
+        new("autumn-winter", new LocalizedText("خريفي / شتوي", "Autumn / Winter")),
+    ];
+
+    public static FabricAttribute Season(string? code) => Find(Seasons, code, "season");
+
     public static FabricAttribute Pattern(string? code) => Find(Patterns, code, "pattern");
 
     public static FabricAttribute Category(string? code) => Find(Categories, code, "category");

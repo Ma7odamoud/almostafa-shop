@@ -35,6 +35,7 @@ public sealed class Fabric
         Material = null!;
         Pattern = null!;
         Category = null!;
+        Specifications = FabricSpecifications.None;
     }
 
     private Fabric(string id, DateTimeOffset now) : this()
@@ -52,6 +53,7 @@ public sealed class Fabric
     public FabricAttribute Material { get; private set; }
     public FabricAttribute Pattern { get; private set; }
     public FabricAttribute Category { get; private set; }
+    public FabricSpecifications Specifications { get; private set; }
     public IReadOnlyList<FabricPhoto> Photos => _photos;
     public bool Hidden { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
@@ -86,6 +88,7 @@ public sealed class Fabric
         Material = details.Material;
         Pattern = FabricTaxonomy.Pattern(details.PatternCode);
         Category = FabricTaxonomy.Category(details.CategoryCode);
+        Specifications = details.Specifications ?? FabricSpecifications.None;
         _photos = [.. details.Photos];
         Hidden = details.Hidden;
         UpdatedAt = now;
@@ -109,4 +112,5 @@ public sealed record FabricDetails(
     string PatternCode,
     string CategoryCode,
     IReadOnlyList<FabricPhoto> Photos,
-    bool Hidden);
+    bool Hidden,
+    FabricSpecifications? Specifications = null);

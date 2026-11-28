@@ -25,7 +25,15 @@ public sealed record FabricDto(
     LocalizedTextDto CategoryLabel,
     IReadOnlyList<FabricPhotoDto> Photos,
     bool Hidden,
-    DateTimeOffset UpdatedAt)
+    DateTimeOffset UpdatedAt,
+    string CompositionAr,
+    string CompositionEn,
+    decimal? WidthCm,
+    int? WeightGsm,
+    string? Season,
+    LocalizedTextDto? SeasonLabel,
+    string CareAr,
+    string CareEn)
 {
     public static FabricDto From(Fabric f) => new(
         f.Id,
@@ -45,7 +53,15 @@ public sealed record FabricDto(
         LocalizedTextDto.From(f.Category.Label),
         [.. f.Photos.Select(p => new FabricPhotoDto(p.Src, p.Alt))],
         f.Hidden,
-        f.UpdatedAt);
+        f.UpdatedAt,
+        f.Specifications.Composition.Ar,
+        f.Specifications.Composition.En,
+        f.Specifications.WidthCm,
+        f.Specifications.WeightGsm,
+        f.Specifications.Season,
+        f.Specifications.Season is { } season ? LocalizedTextDto.From(FabricTaxonomy.Season(season).Label) : null,
+        f.Specifications.Care.Ar,
+        f.Specifications.Care.En);
 }
 
 public sealed record FabricPhotoDto(string Src, string Alt);
@@ -75,6 +91,13 @@ public sealed record UpsertFabricRequest(
     string? Pattern,
     string? Category,
     IReadOnlyList<FabricPhotoDto>? Photos,
-    bool Hidden);
+    bool Hidden,
+    string? CompositionAr = null,
+    string? CompositionEn = null,
+    decimal? WidthCm = null,
+    int? WeightGsm = null,
+    string? Season = null,
+    string? CareAr = null,
+    string? CareEn = null);
 
 public sealed record SetFabricVisibilityRequest(bool Hidden);

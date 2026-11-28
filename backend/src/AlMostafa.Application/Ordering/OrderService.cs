@@ -36,7 +36,8 @@ public sealed class OrderService(
         });
 
         var now = clock.GetUtcNow();
-        var order = Order.Place(NewId(now), request.Name!, request.Address!, request.PaymentMethod!, lines, now);
+        var customer = new OrderCustomer(request.Name, request.Phone, request.Email, request.Governorate, request.Area, request.Address);
+        var order = Order.Place(NewId(now), customer, request.PaymentMethod!, lines, now);
         orders.Add(order);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -51,6 +52,10 @@ public sealed class OrderService(
         var (items, total) = await orders.ListAsync(page, pageSize, cancellationToken);
         return new PagedResult<OrderDto>([.. items.Select(OrderDto.From)], page, pageSize, total);
     }
+
+    public static CheckoutOptionsDto GetCheckoutOptions() => new(
+        [.. DeliveryAreas.Governorates.Select(g => new CheckoutChoiceDto(g.Code, g.Label.Ar, g.Label.En))],
+        [.. PaymentMethods.All.Select(p => new CheckoutChoiceDto(p.Code, p.Label.Ar, p.Label.En))]);
 
     private static string NewId(DateTimeOffset now) =>
         $"order-{now:yyyyMMdd}-{Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(5))}";

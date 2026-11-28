@@ -39,13 +39,17 @@ public class ApplicationTests
     [Fact]
     public void PlaceOrderRequestValidator_reports_every_invalid_field()
     {
-        var result = new PlaceOrderRequestValidator().Validate(new PlaceOrderRequest([], "", null, "paypal"));
+        var result = new PlaceOrderRequestValidator().Validate(new PlaceOrderRequest([], "", "123", "bad", "alexandria", "", null, "paypal"));
 
         var fields = result.Errors.Select(e => e.PropertyName).ToHashSet();
         Assert.Contains("Name", fields);
         Assert.Contains("Address", fields);
         Assert.Contains("PaymentMethod", fields);
         Assert.Contains("Items", fields);
+        Assert.Contains("Phone", fields);
+        Assert.Contains("Email", fields);
+        Assert.Contains("Governorate", fields);
+        Assert.Contains("Area", fields);
     }
 
     [Fact]

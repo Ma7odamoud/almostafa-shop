@@ -115,13 +115,14 @@ PostgreSQL 16, snake_case naming, schema managed by EF Core migrations (`Infrast
 fabrics (id PK varchar(64) e.g. "fab-001")
   name_ar/en, description_ar/en, price_per_meter numeric(12,2), stock_meters numeric(12,2),
   color, color_label_ar/en, material, material_label_ar/en, pattern, pattern_label_ar/en,
-  category, category_label_ar/en, photos jsonb [{src, alt}], hidden, created_at, updated_at
+  category, category_label_ar/en, photos jsonb [{src, alt}], hidden, created_at, updated_at,
+  composition_ar/en, width_cm, weight_gsm, season, care_ar/en   (optional specifications)
   idx: hidden, created_at
 
 orders (id PK varchar(64))                order_items (id PK identity)
-  customer_name, shipping_address,   1──*   order_id FK → orders (cascade)
-  payment_method, status, total,            fabric_id (indexed, no FK), fabric_name_ar/en,
-  created_at (idx)                          meters numeric(10,2), price_per_meter numeric(12,2)
+  customer_name, customer_phone,     1──*   order_id FK → orders (cascade)
+  customer_email, governorate, area,        fabric_id (indexed, no FK), fabric_name_ar/en,
+  shipping_address, payment_method,         meters numeric(10,2), price_per_meter numeric(12,2)
 
 identity_users / identity_roles / identity_user_roles / … (ASP.NET Core Identity)
 data_protection_keys (keys that encrypt session cookies; shared across instances/restarts)

@@ -32,6 +32,23 @@ public sealed class UpsertFabricRequestValidator : AbstractValidator<UpsertFabri
             .Must(c => FabricTaxonomy.Categories.Any(a => a.Code == c?.Trim().ToLowerInvariant()))
             .WithMessage($"Category must be one of: {string.Join(", ", FabricTaxonomy.Categories.Select(c => c.Code))}.");
 
+        RuleFor(x => x.CompositionAr).MaximumLength(FabricSpecifications.MaxTextLength);
+        RuleFor(x => x.CompositionEn).MaximumLength(FabricSpecifications.MaxTextLength);
+        RuleFor(x => x.CareAr).MaximumLength(FabricSpecifications.MaxTextLength);
+        RuleFor(x => x.CareEn).MaximumLength(FabricSpecifications.MaxTextLength);
+        RuleFor(x => x.WidthCm)
+            .InclusiveBetween(FabricSpecifications.MinWidthCm, FabricSpecifications.MaxWidthCm)
+            .When(x => x.WidthCm is not null)
+            .WithMessage($"Width must be between {FabricSpecifications.MinWidthCm} and {FabricSpecifications.MaxWidthCm} cm.");
+        RuleFor(x => x.WeightGsm)
+            .InclusiveBetween(FabricSpecifications.MinWeightGsm, FabricSpecifications.MaxWeightGsm)
+            .When(x => x.WeightGsm is not null)
+            .WithMessage($"Weight must be between {FabricSpecifications.MinWeightGsm} and {FabricSpecifications.MaxWeightGsm} g/m.");
+        RuleFor(x => x.Season)
+            .Must(s => FabricTaxonomy.Seasons.Any(a => string.Equals(a.Code, s!.Trim(), StringComparison.OrdinalIgnoreCase)))
+            .When(x => !string.IsNullOrWhiteSpace(x.Season))
+            .WithMessage($"Season must be one of: {string.Join(", ", FabricTaxonomy.Seasons.Select(a => a.Code))}.");
+
         RuleFor(x => x.Photos!.Count).LessThanOrEqualTo(Fabric.MaxPhotos).When(x => x.Photos is not null).WithName("photos");
         RuleForEach(x => x.Photos).ChildRules(photo =>
         {

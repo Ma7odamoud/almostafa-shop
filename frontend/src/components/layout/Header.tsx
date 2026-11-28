@@ -30,7 +30,8 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
 
   // Total cart item count
-  const cartCount = items.reduce((sum, item) => sum + item.meters, 0);
+  // Number of fabrics in the cart (not metres).
+  const cartCount = items.length;
 
   // Is this the homepage where transparent hero header is active?
   const isHome = pathname === "/";

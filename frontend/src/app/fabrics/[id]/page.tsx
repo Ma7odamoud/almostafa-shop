@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useLang } from "@/lib/preferences/preferences";
 import { useCart } from "@/features/cart/cart-context";
 import { t } from "@/lib/i18n";
+import { formatPrice } from "@/lib/format";
 import SizeGuideModal from "@/features/catalog/components/SizeGuideModal";
 import { sizeGuide } from "@/features/catalog/data/size-guide";
 import type { Fabric } from "@/features/catalog/types";
@@ -20,46 +21,21 @@ import {
   XIcon,
 } from "@/components/ui/Icons";
 
+/** Only details the owner actually entered are shown — nothing is estimated. */
 function getFabricSpecs(fabric: Fabric, locale: "ar" | "en") {
-  const mat = fabric.material.toLowerCase();
-  const cat = fabric.category.toLowerCase();
+  const ar = locale === "ar";
+  const pick = (arText: string, enText: string) => (ar ? arText || enText : enText || arText);
+  const specs: { label: string; value: string }[] = [];
 
-  let weight = "270 g/m";
-  let seasonAr = "طوال العام";
-  let seasonEn = "All Seasons";
+  const composition = pick(fabric.compositionAr, fabric.compositionEn);
+  if (composition) specs.push({ label: ar ? "التركيب" : "Composition", value: composition });
+  if (fabric.widthCm != null) specs.push({ label: ar ? "العرض" : "Width", value: ar ? `${fabric.widthCm} سم` : `${fabric.widthCm} cm` });
+  if (fabric.weightGsm != null) specs.push({ label: ar ? "الوزن" : "Weight", value: ar ? `${fabric.weightGsm} جم/م` : `${fabric.weightGsm} g/m` });
+  if (fabric.seasonLabel) specs.push({ label: ar ? "الموسم" : "Season", value: ar ? fabric.seasonLabel.ar : fabric.seasonLabel.en });
+  const care = pick(fabric.careAr, fabric.careEn);
+  if (care) specs.push({ label: ar ? "العناية" : "Care", value: care });
 
-  if (mat === "linen") {
-    weight = "220 g/m";
-    seasonAr = "صيفي وخفيف";
-    seasonEn = "Spring / Summer";
-  } else if (mat === "cashmere" || cat === "coat") {
-    weight = "380 g/m";
-    seasonAr = "شتوي دافئ";
-    seasonEn = "Autumn / Winter";
-  } else if (mat === "wool" && cat === "jacket") {
-    weight = "310 g/m";
-    seasonAr = "خريفي / شتوي";
-    seasonEn = "Autumn / Winter";
-  }
-
-  return [
-    {
-      label: locale === "ar" ? "العرض" : "Width",
-      value: locale === "ar" ? "150 سم" : "150 cm",
-    },
-    {
-      label: locale === "ar" ? "الوزن التقريبي" : "Weight",
-      value: weight,
-    },
-    {
-      label: locale === "ar" ? "الموسم" : "Season",
-      value: locale === "ar" ? seasonAr : seasonEn,
-    },
-    {
-      label: locale === "ar" ? "العناية" : "Care",
-      value: locale === "ar" ? "تنظيف جاف فقط" : "Dry Clean Only",
-    },
-  ];
+  return specs;
 }
 
 export default function FabricDetailPage() {
@@ -130,7 +106,7 @@ export default function FabricDetailPage() {
   const desc = isAr ? fabric.descriptionAr : fabric.descriptionEn;
   const hasPrice = fabric.pricePerMeter > 0;
   const hasStock = fabric.stockMeters > 0;
-  const totalPrice = hasPrice ? (fabric.pricePerMeter * meters).toFixed(2) : null;
+  const totalPrice = hasPrice ? formatPrice(fabric.pricePerMeter * meters, locale) : null;
   const activeCat = sizeGuide.categories.find((c) => c.key === garment) ?? sizeGuide.categories[0];
   const specs = getFabricSpecs(fabric, locale);
   const currentImgSrc = fabric.photos[activePhoto]?.src ?? "/demo/fabric-draped-placeholder.svg";
@@ -321,7 +297,7 @@ export default function FabricDetailPage() {
                 {t(locale, "pricePerMeter")}
               </p>
               <p style={{ color: "var(--price)", fontSize: "1.35rem", fontWeight: 500 }}>
-                {hasPrice ? `${fabric.pricePerMeter.toFixed(2)}` : t(locale, "demoPrice")}
+                {hasPrice ? formatPrice(fabric.pricePerMeter, locale) : t(locale, "demoPrice")}
               </p>
             </div>
 
@@ -344,7 +320,8 @@ export default function FabricDetailPage() {
           {/* Description */}
           <p style={{ color: "var(--fg-body)", lineHeight: 1.75, fontSize: "0.95rem" }}>{desc}</p>
 
-          {/* Technical Fabric Specifications */}
+          {/* Technical Fabric Specifications (hidden when none were entered) */}
+          {specs.length > 0 && (
           <div
             style={{
               display: "grid",
@@ -367,6 +344,7 @@ export default function FabricDetailPage() {
               </div>
             ))}
           </div>
+          )}
 
           <div className="divider-gold" style={{ margin: "0" }} />
 

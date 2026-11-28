@@ -25,6 +25,15 @@ internal sealed class FabricConfiguration : IEntityTypeConfiguration<Fabric>
         Attribute(b.ComplexProperty(f => f.Category), "category");
 
         // Photos are an ordered value list that is always loaded with the fabric -> a single jsonb column.
+        b.ComplexProperty(f => f.Specifications, spec =>
+        {
+            Localized(spec.ComplexProperty(x => x.Composition), "composition", FabricSpecifications.MaxTextLength);
+            Localized(spec.ComplexProperty(x => x.Care), "care", FabricSpecifications.MaxTextLength);
+            spec.Property(x => x.WidthCm).HasColumnName("width_cm").HasPrecision(5, 1);
+            spec.Property(x => x.WeightGsm).HasColumnName("weight_gsm");
+            spec.Property(x => x.Season).HasColumnName("season").HasMaxLength(32);
+        });
+
         // Mapped through the private list field so the domain can keep exposing a read-only collection.
         b.Ignore(f => f.Photos);
         b.ComplexCollection<List<FabricPhoto>, FabricPhoto>("_photos", photos =>

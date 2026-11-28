@@ -93,4 +93,37 @@ public class FabricTests
         else
             Assert.Throws<DomainException>(() => new FabricPhoto(src, "alt"));
     }
+
+    [Fact]
+    public void Specifications_are_optional_and_never_invented()
+    {
+        var fabric = Fabric.Create("fab-1", Details(), Now);
+
+        Assert.Null(fabric.Specifications.WidthCm);
+        Assert.Null(fabric.Specifications.WeightGsm);
+        Assert.Null(fabric.Specifications.Season);
+        Assert.True(fabric.Specifications.Composition.IsEmpty);
+    }
+
+    [Fact]
+    public void Specifications_are_stored_when_entered()
+    {
+        var spec = new FabricSpecifications(new LocalizedText("١٠٠٪ صوف", "100% Wool"), 150m, 260, "Autumn-Winter", new LocalizedText("", "Dry clean"));
+        var fabric = Fabric.Create("fab-1", Details() with { Specifications = spec }, Now);
+
+        Assert.Equal(150m, fabric.Specifications.WidthCm);
+        Assert.Equal(260, fabric.Specifications.WeightGsm);
+        Assert.Equal("autumn-winter", fabric.Specifications.Season);
+        Assert.Equal("100% Wool", fabric.Specifications.Composition.En);
+    }
+
+    [Theory]
+    [InlineData(20, null, null, "invalid_width")]
+    [InlineData(null, 5000, null, "invalid_weight")]
+    [InlineData(null, null, "monsoon", "invalid_season")]
+    public void Specifications_reject_implausible_values(int? width, int? weight, string? season, string code)
+    {
+        var ex = Assert.Throws<DomainException>(() => new FabricSpecifications(null, width, weight, season, null));
+        Assert.Equal(code, ex.Code);
+    }
 }
