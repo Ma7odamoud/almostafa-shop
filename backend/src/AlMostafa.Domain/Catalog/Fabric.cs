@@ -36,6 +36,7 @@ public sealed class Fabric
         Pattern = null!;
         Category = null!;
         Specifications = FabricSpecifications.None;
+        SearchText = string.Empty;
     }
 
     private Fabric(string id, DateTimeOffset now) : this()
@@ -58,6 +59,9 @@ public sealed class Fabric
     public bool Hidden { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset UpdatedAt { get; private set; }
+
+    /// <summary>Normalised bilingual text used for search (indexed with a trigram index). Derived; never edited directly.</summary>
+    public string SearchText { get; private set; }
 
     public bool HasPrice => PricePerMeter > 0;
 
@@ -92,7 +96,15 @@ public sealed class Fabric
         _photos = [.. details.Photos];
         Hidden = details.Hidden;
         UpdatedAt = now;
+        RefreshSearchText();
     }
+
+    /// <summary>Recomputes <see cref="SearchText"/> from the current names, descriptions and labels.</summary>
+    public void RefreshSearchText() => SearchText = Catalog.SearchText.Build(
+        Name.Ar, Name.En, Description.Ar, Description.En,
+        Color.Label.Ar, Color.Label.En, Material.Label.Ar, Material.Label.En,
+        Pattern.Label.Ar, Pattern.Label.En, Category.Label.Ar, Category.Label.En,
+        Specifications.Composition.Ar, Specifications.Composition.En);
 
     public void SetVisibility(bool hidden, DateTimeOffset now)
     {

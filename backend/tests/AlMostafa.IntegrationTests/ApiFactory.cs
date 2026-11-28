@@ -19,6 +19,8 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private readonly string _database = "almostafa_test_" + Guid.NewGuid().ToString("N")[..12];
     private readonly string _uploads = Path.Combine(Path.GetTempPath(), "almostafa-uploads-" + Guid.NewGuid().ToString("N"));
 
+    public string OriginalsPath { get; } = Path.Combine(Path.GetTempPath(), "almostafa-originals-" + Guid.NewGuid().ToString("N"));
+
     private static string DbServer =>
         Environment.GetEnvironmentVariable("TEST_DATABASE") ?? "Host=localhost;Port=5432;Username=postgres;Password=postgres";
 
@@ -36,6 +38,7 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Admin:Password", AdminPassword);
         builder.UseSetting("LegacyImport:DataPath", legacy);
         builder.UseSetting("Storage:UploadsPath", _uploads);
+        builder.UseSetting("Storage:OriginalsPath", OriginalsPath);
         builder.UseSetting("Auth:SecureCookies", "false");
         builder.UseSetting("RateLimiting:GlobalPerMinute", "100000");
         builder.UseSetting("RateLimiting:OrdersPerMinute", "100000");
@@ -64,6 +67,7 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         await using var cmd = new NpgsqlCommand($"DROP DATABASE IF EXISTS \"{_database}\" WITH (FORCE)", conn);
         await cmd.ExecuteNonQueryAsync();
         if (Directory.Exists(_uploads)) Directory.Delete(_uploads, recursive: true);
+        if (Directory.Exists(OriginalsPath)) Directory.Delete(OriginalsPath, recursive: true);
         GC.SuppressFinalize(this);
     }
 }

@@ -65,6 +65,7 @@ app.UseCors(ApiConventions.CorsPolicy);
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseOutputCache();
 
 if (app.Environment.IsDevelopment())
 {

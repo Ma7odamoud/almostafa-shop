@@ -61,6 +61,17 @@ internal static class ApiServiceCollectionExtensions
 
         services.AddHealthChecks().AddDbContextCheck<AppDbContext>("database");
 
+        // Default output-cache rules already refuse authenticated requests and responses that set cookies.
+        services.AddOutputCache(o =>
+        {
+            o.SizeLimit = 64 * 1024 * 1024;
+            o.AddPolicy(CatalogOutputCache.Policy, p => p
+                .Expire(TimeSpan.FromMinutes(10)) // safety net; real freshness comes from tag eviction on every change
+                .SetVaryByQuery("*")
+                .Tag(CatalogOutputCache.Tag));
+        });
+        services.AddScoped<AlMostafa.Application.Catalog.ICatalogCache, CatalogOutputCache>();
+
         services.AddOpenApi("v1", o => o.AddDocumentTransformer((document, _, _) =>
         {
             document.Info = new OpenApiInfo

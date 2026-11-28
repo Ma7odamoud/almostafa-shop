@@ -27,20 +27,30 @@ internal sealed class SkiaImageProcessor : IImageProcessor
             throw new InvalidImageException();
 
         using var oriented = ApplyOrientation(decoded, codec.EncodedOrigin);
-        using var resized = Resize(oriented);
-        using var image = SKImage.FromBitmap(resized);
-        using var data = image.Encode(SKEncodedImageFormat.Webp, Quality) ?? throw new InvalidImageException();
+        using var main = ScaleTo(oriented, Math.Min(1.0, MaxEdge / (double)Math.Max(oriented.Width, oriented.Height)));
 
-        return new ProcessedImage(data.ToArray(), "webp", resized.Width, resized.Height);
+        // Each smaller size is scaled from the main image (already ≤ 2000 px), which is much faster than from the original.
+        var variants = new Dictionary<int, byte[]>();
+        foreach (var width in ImageVariants.Widths)
+        {
+            using var variant = ScaleTo(main, Math.Min(1.0, width / (double)main.Width));
+            variants[width] = Encode(variant);
+        }
+
+        return new ProcessedImage(Encode(main), "webp", main.Width, main.Height, variants);
     }
 
-    private static SKBitmap Resize(SKBitmap bitmap)
+    private static byte[] Encode(SKBitmap bitmap)
     {
-        var longEdge = Math.Max(bitmap.Width, bitmap.Height);
-        if (longEdge <= MaxEdge) return bitmap.Copy();
+        using var image = SKImage.FromBitmap(bitmap);
+        using var data = image.Encode(SKEncodedImageFormat.Webp, Quality) ?? throw new InvalidImageException();
+        return data.ToArray();
+    }
 
-        var scale = MaxEdge / (double)longEdge;
-        var size = new SKImageInfo((int)Math.Round(bitmap.Width * scale), (int)Math.Round(bitmap.Height * scale), bitmap.ColorType, bitmap.AlphaType);
+    private static SKBitmap ScaleTo(SKBitmap bitmap, double scale)
+    {
+        if (scale >= 1.0) return bitmap.Copy();
+        var size = new SKImageInfo(Math.Max(1, (int)Math.Round(bitmap.Width * scale)), Math.Max(1, (int)Math.Round(bitmap.Height * scale)), bitmap.ColorType, bitmap.AlphaType);
         return bitmap.Resize(size, new SKSamplingOptions(SKCubicResampler.Mitchell)) ?? throw new InvalidImageException();
     }
 

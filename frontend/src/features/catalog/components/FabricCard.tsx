@@ -4,13 +4,21 @@ import Link from "next/link";
 import { useLang } from "@/lib/preferences/preferences";
 import { t } from "@/lib/i18n";
 import { formatPrice } from "@/lib/format";
-import type { Fabric } from "@/features/catalog/types";
+import type { FabricSummary } from "@/features/catalog/types";
+import { handleImageError, responsiveImage } from "@/lib/images";
+
+const PLACEHOLDER = "/demo/fabric-draped-placeholder.svg";
+/** Card widths in the grids: 2 columns on phones, ~3 on tablets, ~280 px cards on desktop. */
+const DEFAULT_SIZES = "(max-width: 600px) 50vw, (max-width: 1100px) 33vw, 280px";
 
 interface Props {
-  fabric: Fabric;
+  fabric: FabricSummary;
+  /** Above-the-fold cards: load immediately with high priority (helps Largest Contentful Paint). */
+  priority?: boolean;
+  sizes?: string;
 }
 
-export default function FabricCard({ fabric }: Props) {
+export default function FabricCard({ fabric, priority = false, sizes = DEFAULT_SIZES }: Props) {
   const { locale } = useLang();
   const [hovered, setHovered] = React.useState(false);
 
@@ -18,7 +26,8 @@ export default function FabricCard({ fabric }: Props) {
   const imgSrc =
     hovered && fabric.photos[1]
       ? fabric.photos[1].src
-      : fabric.photos[0]?.src ?? "/demo/fabric-draped-placeholder.svg";
+      : fabric.photos[0]?.src ?? PLACEHOLDER;
+  const image = responsiveImage(imgSrc);
   const imgAlt =
     hovered && fabric.photos[1]
       ? fabric.photos[1].alt
@@ -56,8 +65,13 @@ export default function FabricCard({ fabric }: Props) {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={imgSrc}
+            src={image.src}
+            srcSet={image.srcSet}
+            sizes={image.srcSet ? sizes : undefined}
             alt={imgAlt}
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            decoding="async"
             style={{
               position: "absolute",
               inset: 0,
@@ -68,9 +82,7 @@ export default function FabricCard({ fabric }: Props) {
               opacity: hovered ? 0.96 : 1,
               transform: hovered ? "scale(1.04)" : "scale(1)",
             }}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "/demo/fabric-draped-placeholder.svg";
-            }}
+            onError={(e) => handleImageError(e, imgSrc, PLACEHOLDER)}
           />
 
           {/* Subtle Category Pill */}

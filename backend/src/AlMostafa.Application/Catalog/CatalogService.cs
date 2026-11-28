@@ -7,11 +7,21 @@ namespace AlMostafa.Application.Catalog;
 /// <summary>Storefront (read-only) catalogue use cases.</summary>
 public sealed class CatalogService(IFabricRepository fabrics) : ICatalogPricing
 {
-    public async Task<PagedResult<FabricDto>> SearchAsync(FabricSearchCriteria criteria, CancellationToken cancellationToken)
+    public const int MaxSimilar = 12;
+
+    public async Task<PagedResult<FabricSummaryDto>> SearchAsync(FabricSearchCriteria criteria, CancellationToken cancellationToken)
     {
         var normalized = Normalize(criteria) with { IncludeHidden = false };
-        var (items, total) = await fabrics.SearchAsync(normalized, cancellationToken);
-        return new PagedResult<FabricDto>([.. items.Select(FabricDto.From)], normalized.Page, normalized.PageSize, total);
+        var (items, total) = await fabrics.SearchSummariesAsync(normalized, cancellationToken);
+        return new PagedResult<FabricSummaryDto>(items, normalized.Page, normalized.PageSize, total);
+    }
+
+    public async Task<IReadOnlyList<FabricSummaryDto>> GetSimilarAsync(string id, int limit, CancellationToken cancellationToken)
+    {
+        var fabric = await fabrics.FindAsync(id, cancellationToken);
+        if (fabric is null || fabric.Hidden)
+            throw new NotFoundException("Fabric", id);
+        return await fabrics.FindSimilarAsync(fabric, Math.Clamp(limit, 1, MaxSimilar), cancellationToken);
     }
 
     public async Task<FabricDto> GetAsync(string id, CancellationToken cancellationToken)
@@ -44,7 +54,7 @@ public sealed class CatalogService(IFabricRepository fabrics) : ICatalogPricing
 
     internal static FabricSearchCriteria Normalize(FabricSearchCriteria c) => c with
     {
-        Search = string.IsNullOrWhiteSpace(c.Search) ? null : c.Search.Trim()[..Math.Min(c.Search.Trim().Length, 100)],
+        Search = SearchText.Normalize(c.Search) is { Length: > 0 } q ? q[..Math.Min(q.Length, 100)] : null,
         Colors = NormalizeCodes(c.Colors),
         Patterns = NormalizeCodes(c.Patterns),
         Materials = NormalizeCodes(c.Materials),

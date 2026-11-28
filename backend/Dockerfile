@@ -20,10 +20,11 @@ WORKDIR /app
 ENV ASPNETCORE_HTTP_PORTS=8080 \
     ASPNETCORE_ENVIRONMENT=Production \
     DOTNET_NOLOGO=1 \
-    Storage__UploadsPath=/app/data/uploads
+    Storage__UploadsPath=/app/data/uploads \
+    Storage__OriginalsPath=/app/data/originals
 COPY --from=build /app .
-# Uploads live on a volume mounted here; make it writable by the non-root user.
-RUN mkdir -p /app/data/uploads && chown -R $APP_UID /app/data
+# Photos (web sizes) and private originals live on volumes mounted here; writable by the non-root user.
+RUN mkdir -p /app/data/uploads /app/data/originals && chown -R $APP_UID /app/data
 USER $APP_UID
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "AlMostafa.API.dll"]

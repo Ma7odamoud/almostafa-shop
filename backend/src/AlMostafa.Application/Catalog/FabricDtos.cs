@@ -66,6 +66,26 @@ public sealed record FabricDto(
 
 public sealed record FabricPhotoDto(string Src, string Alt);
 
+/// <summary>
+/// What a fabric card needs — and nothing more (no descriptions or specifications), keeping listing
+/// responses small. Returned by listings, search, suggestions and "similar fabrics".
+/// </summary>
+public sealed record FabricSummaryDto(
+    string Id,
+    string NameAr,
+    string NameEn,
+    decimal PricePerMeter,
+    decimal StockMeters,
+    string Color,
+    LocalizedTextDto ColorLabel,
+    string Material,
+    LocalizedTextDto MaterialLabel,
+    string Pattern,
+    LocalizedTextDto PatternLabel,
+    string Category,
+    LocalizedTextDto CategoryLabel,
+    IReadOnlyList<FabricPhotoDto> Photos);
+
 /// <summary>A selectable filter value with its bilingual label.</summary>
 public sealed record FacetOptionDto(string Value, string LabelAr, string LabelEn);
 

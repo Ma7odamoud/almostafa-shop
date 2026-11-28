@@ -11,6 +11,7 @@ namespace AlMostafa.Application.Catalog;
 public sealed class FabricManagementService(
     IFabricRepository fabrics,
     IUnitOfWork unitOfWork,
+    ICatalogCache catalogCache,
     IValidator<UpsertFabricRequest> validator,
     TimeProvider clock,
     ILogger<FabricManagementService> logger)
@@ -33,6 +34,7 @@ public sealed class FabricManagementService(
         var fabric = Fabric.Create(id, ToDetails(request), clock.GetUtcNow());
         fabrics.Add(fabric);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await catalogCache.InvalidateAsync(cancellationToken);
 
         logger.LogInformation("Fabric {FabricId} created", fabric.Id);
         return FabricDto.From(fabric);
@@ -45,6 +47,7 @@ public sealed class FabricManagementService(
         var fabric = await LoadAsync(id, cancellationToken);
         fabric.Update(ToDetails(request), clock.GetUtcNow());
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await catalogCache.InvalidateAsync(cancellationToken);
 
         logger.LogInformation("Fabric {FabricId} updated", fabric.Id);
         return FabricDto.From(fabric);
@@ -55,6 +58,7 @@ public sealed class FabricManagementService(
         var fabric = await LoadAsync(id, cancellationToken);
         fabric.SetVisibility(hidden, clock.GetUtcNow());
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await catalogCache.InvalidateAsync(cancellationToken);
 
         logger.LogInformation("Fabric {FabricId} visibility set to hidden={Hidden}", fabric.Id, hidden);
         return FabricDto.From(fabric);
@@ -65,6 +69,7 @@ public sealed class FabricManagementService(
         var fabric = await LoadAsync(id, cancellationToken);
         fabrics.Remove(fabric);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await catalogCache.InvalidateAsync(cancellationToken);
 
         // Orders keep their own name/price snapshot, so past orders are unaffected.
         logger.LogInformation("Fabric {FabricId} deleted", id);

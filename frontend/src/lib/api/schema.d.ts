@@ -11,8 +11,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List visible fabrics with filtering, search, sorting and pagination. */
+        /** List visible fabrics (card-sized summaries) with filtering, search, sorting and pagination. Also used for search suggestions (pageSize=6). */
         get: operations["ListFabrics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/fabrics/{id}/similar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Visible fabrics most like this one (same garment category, then material, colour, pattern). */
+        get: operations["GetSimilarFabrics"];
         put?: never;
         post?: never;
         delete?: never;
@@ -64,7 +81,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Place an order. Prices and totals are computed by the server from the catalogue. */
+        /** Place an order. Prices and totals are computed by the server. Send an Idempotency-Key header (e.g. a UUID per checkout) to make retries safe. */
         post: operations["PlaceOrder"];
         delete?: never;
         options?: never;
@@ -305,6 +322,24 @@ export interface components {
             src: string;
             alt: string;
         };
+        FabricSummaryDto: {
+            id: string;
+            nameAr: string;
+            nameEn: string;
+            /** Format: double */
+            pricePerMeter: number;
+            /** Format: double */
+            stockMeters: number;
+            color: string;
+            colorLabel: components["schemas"]["LocalizedTextDto"];
+            material: string;
+            materialLabel: components["schemas"]["LocalizedTextDto"];
+            pattern: string;
+            patternLabel: components["schemas"]["LocalizedTextDto"];
+            category: string;
+            categoryLabel: components["schemas"]["LocalizedTextDto"];
+            photos: components["schemas"]["FabricPhotoDto"][];
+        };
         FacetOptionDto: {
             value: string;
             labelAr: string;
@@ -368,6 +403,17 @@ export interface components {
         };
         PagedResultOfFabricDto: {
             items: components["schemas"]["FabricDto"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            totalPages?: number;
+        };
+        PagedResultOfFabricSummaryDto: {
+            items: components["schemas"]["FabricSummaryDto"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */
@@ -477,7 +523,40 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PagedResultOfFabricDto"];
+                    "application/json": components["schemas"]["PagedResultOfFabricSummaryDto"];
+                };
+            };
+        };
+    };
+    GetSimilarFabrics: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FabricSummaryDto"][];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetails"];
                 };
             };
         };
@@ -536,7 +615,9 @@ export interface operations {
     PlaceOrder: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -546,6 +627,15 @@ export interface operations {
             };
         };
         responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderConfirmationDto"];
+                };
+            };
             /** @description Created */
             201: {
                 headers: {

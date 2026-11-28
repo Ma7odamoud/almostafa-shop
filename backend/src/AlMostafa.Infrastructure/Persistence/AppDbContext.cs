@@ -20,6 +20,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.HasPostgresExtension("pg_trgm");
 
         // Keep every table in the same snake_case style (the Identity defaults are PascalCase "AspNet*").
         builder.Entity<IdentityUser>().ToTable("identity_users");

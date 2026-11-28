@@ -13,6 +13,7 @@ public sealed class Order
     public const int MaxAddressLength = 1000;
     public const int MaxEmailLength = 256;
     public const int MaxAreaLength = 100;
+    public const int MaxIdempotencyKeyLength = 64;
     public const int MaxItems = 50;
 
     private readonly List<OrderItem> _items = [];
@@ -42,11 +43,17 @@ public sealed class Order
     public OrderStatus Status { get; private set; }
     public decimal Total { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
+
+    /// <summary>Client-generated key that makes resubmitting the same checkout safe (no duplicate orders).</summary>
+    public string? IdempotencyKey { get; private set; }
     public IReadOnlyList<OrderItem> Items => _items;
 
-    public static Order Place(string id, OrderCustomer customer, string paymentMethod, IEnumerable<OrderLine> lines, DateTimeOffset now)
+    public static Order Place(string id, OrderCustomer customer, string paymentMethod, IEnumerable<OrderLine> lines, DateTimeOffset now,
+        string? idempotencyKey = null)
     {
         ArgumentNullException.ThrowIfNull(customer);
+        if (idempotencyKey is { Length: > MaxIdempotencyKeyLength })
+            throw new DomainException("invalid_idempotency_key", $"Idempotency key must be at most {MaxIdempotencyKeyLength} characters.");
 
         var order = new Order
         {
@@ -60,6 +67,7 @@ public sealed class Order
             PaymentMethod = PaymentMethods.Normalize(paymentMethod),
             Status = OrderStatus.Pending,
             CreatedAt = now,
+            IdempotencyKey = string.IsNullOrWhiteSpace(idempotencyKey) ? null : idempotencyKey.Trim(),
         };
 
         if (order.CustomerName.Length == 0)

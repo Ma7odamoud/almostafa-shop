@@ -16,8 +16,15 @@ public sealed class OrderService(
     TimeProvider clock,
     ILogger<OrderService> logger)
 {
-    public async Task<OrderConfirmationDto> PlaceAsync(PlaceOrderRequest request, CancellationToken cancellationToken)
+    /// <summary>
+    /// Places an order in a single transaction (order + lines). With an <paramref name="idempotencyKey"/>, resubmitting the
+    /// same checkout (double tap, network retry) returns the original order instead of creating a second one.
+    /// </summary>
+    public async Task<OrderPlacement> PlaceAsync(PlaceOrderRequest request, string? idempotencyKey, CancellationToken cancellationToken)
     {
+        if (idempotencyKey is not null && await orders.FindByIdempotencyKeyAsync(idempotencyKey, cancellationToken) is { } previous)
+            return new OrderPlacement(Confirmation(previous), Replayed: true);
+
         await validator.EnsureValidAsync(request, cancellationToken);
         var items = request.Items!;
 
@@ -37,13 +44,25 @@ public sealed class OrderService(
 
         var now = clock.GetUtcNow();
         var customer = new OrderCustomer(request.Name, request.Phone, request.Email, request.Governorate, request.Area, request.Address);
-        var order = Order.Place(NewId(now), customer, request.PaymentMethod!, lines, now);
+        var order = Order.Place(NewId(now), customer, request.PaymentMethod!, lines, now, idempotencyKey);
         orders.Add(order);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex) when (idempotencyKey is not null && orders.IsDuplicateIdempotencyKey(ex))
+        {
+            // A concurrent request with the same key won the race: answer with that order.
+            var winner = await orders.FindByIdempotencyKeyAsync(idempotencyKey, cancellationToken)
+                ?? throw new InvalidOperationException("Order with idempotency key vanished.", ex);
+            return new OrderPlacement(Confirmation(winner), Replayed: true);
+        }
 
         logger.LogInformation("Order {OrderId} placed with {ItemCount} items, total {Total}", order.Id, order.Items.Count, order.Total);
-        return new OrderConfirmationDto(order.Id, order.Total, order.CreatedAt);
+        return new OrderPlacement(Confirmation(order), Replayed: false);
     }
+
+    private static OrderConfirmationDto Confirmation(Order o) => new(o.Id, o.Total, o.CreatedAt);
 
     public async Task<PagedResult<OrderDto>> ListAsync(int page, int pageSize, CancellationToken cancellationToken)
     {

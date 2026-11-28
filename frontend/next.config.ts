@@ -37,6 +37,17 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // Next.js serves public/ files with max-age=0 (revalidated on every page view). Fonts never change in place
+      // (new versions get new file names), so cache them for a year; logos and placeholders for a day.
+      { source: "/fonts/:path*", headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }] },
+      {
+        source: "/:file(logo.*|logo-.*|favicon.ico)",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }],
+      },
+      {
+        source: "/:dir(assets|demo)/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }],
+      },
       {
         source: "/:path*",
         headers: [

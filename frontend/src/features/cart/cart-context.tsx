@@ -35,13 +35,21 @@ function readCart(): CartItem[] {
   }
 }
 
-/** Must be rendered client-side only (inside PreferencesProvider, which waits for mount). */
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(readCart);
+  // The cart lives only in this browser, so it is empty during server rendering and loaded right after hydration.
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem(CART_KEY, JSON.stringify(items));
-  }, [items]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setItems(readCart());
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return; // never overwrite the saved cart with the empty initial state
+    try { localStorage.setItem(CART_KEY, JSON.stringify(items)); } catch { /* storage unavailable */ }
+  }, [items, loaded]);
 
   const addItem = (item: CartItem) => {
     setItems((prev) => {

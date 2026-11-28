@@ -21,6 +21,7 @@ namespace AlMostafa.Infrastructure.Persistence.Migrations
                 .HasAnnotation("ProductVersion", "10.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_trgm");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("AlMostafa.Domain.Catalog.Fabric", b =>
@@ -42,6 +43,14 @@ namespace AlMostafa.Infrastructure.Persistence.Migrations
                         .HasPrecision(12, 2)
                         .HasColumnType("numeric(12,2)")
                         .HasColumnName("price_per_meter");
+
+                    b.Property<string>("SearchText")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(6000)
+                        .HasColumnType("character varying(6000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("search_text");
 
                     b.Property<decimal>("StockMeters")
                         .HasPrecision(12, 2)
@@ -272,8 +281,11 @@ namespace AlMostafa.Infrastructure.Persistence.Migrations
                     b.HasIndex("CreatedAt")
                         .HasDatabaseName("ix_fabrics_created_at");
 
-                    b.HasIndex("Hidden")
-                        .HasDatabaseName("ix_fabrics_hidden");
+                    b.HasIndex("SearchText")
+                        .HasDatabaseName("ix_fabrics_search_text_trgm");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("SearchText"), "gin");
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("SearchText"), new[] { "gin_trgm_ops" });
 
                     b.ToTable("fabrics", (string)null);
                 });
@@ -318,6 +330,11 @@ namespace AlMostafa.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("governorate");
 
+                    b.Property<string>("IdempotencyKey")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("idempotency_key");
+
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -346,6 +363,11 @@ namespace AlMostafa.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CreatedAt")
                         .HasDatabaseName("ix_orders_created_at");
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("ux_orders_idempotency_key")
+                        .HasFilter("idempotency_key IS NOT NULL");
 
                     b.ToTable("orders", (string)null);
                 });
@@ -399,9 +421,6 @@ namespace AlMostafa.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_order_items");
-
-                    b.HasIndex("FabricId")
-                        .HasDatabaseName("ix_order_items_fabric_id");
 
                     b.HasIndex("OrderId")
                         .HasDatabaseName("ix_order_items_order_id");

@@ -37,6 +37,7 @@ services:
       Media__MaxUploadBytes: "20971520"
     volumes:
       - uploads:/app/data/uploads
+      - originals:/app/data/originals
     networks: [internal]
 
   web:
@@ -76,6 +77,7 @@ networks:
 
 volumes:
   pgdata:     # all shop data: fabrics, orders, admin account
-  uploads:    # fabric photos
+  uploads:    # fabric photos, web sizes (served at /uploads)
+  originals:  # untouched uploaded photos (private, never served)
   caddy_data: # HTTPS certificates
   caddy_config:

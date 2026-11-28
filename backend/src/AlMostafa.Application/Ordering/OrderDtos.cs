@@ -21,6 +21,9 @@ public sealed record PlaceOrderItem(string FabricId, decimal Meters);
 
 public sealed record OrderConfirmationDto(string OrderId, decimal Total, DateTimeOffset CreatedAt);
 
+/// <summary>Result of placing an order; <see cref="Replayed"/> is true when an earlier identical submission is returned.</summary>
+public sealed record OrderPlacement(OrderConfirmationDto Confirmation, bool Replayed);
+
 public sealed record OrderDto(
     string Id,
     string Name,

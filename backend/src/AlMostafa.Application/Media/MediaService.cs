@@ -18,6 +18,9 @@ public interface IFileStorage
 {
     /// <summary>Stores the content under <paramref name="fileName"/> and returns its public site-relative URL.</summary>
     Task<string> SaveAsync(Stream content, string fileName, CancellationToken cancellationToken);
+
+    /// <summary>Keeps the untouched upload in private storage (never served: it may contain location data).</summary>
+    Task SaveOriginalAsync(Stream content, string fileName, CancellationToken cancellationToken);
 }
 
 /// <summary>Port to the image codec: makes an upload web-ready (oriented, resized, metadata-free).</summary>
@@ -27,7 +30,21 @@ public interface IImageProcessor
     Task<ProcessedImage> ProcessAsync(Stream source, CancellationToken cancellationToken);
 }
 
-public sealed record ProcessedImage(byte[] Content, string Extension, int Width, int Height);
+/// <summary>
+/// A web-ready photo: <see cref="Content"/> is the main image (long edge ≤ 2000 px) and <see cref="Variants"/> holds
+/// narrower copies keyed by width (see <see cref="ImageVariants.Widths"/>), stored as <c>name-{width}.webp</c>.
+/// </summary>
+public sealed record ProcessedImage(byte[] Content, string Extension, int Width, int Height, IReadOnlyDictionary<int, byte[]> Variants);
+
+/// <summary>Responsive sizes generated for every photo. The storefront builds its srcset from the same widths.</summary>
+public static class ImageVariants
+{
+    public static IReadOnlyList<int> Widths { get; } = [480, 960];
+
+    /// <summary>"abc.webp" → "abc-480.webp".</summary>
+    public static string FileName(string mainFileName, int width) =>
+        $"{Path.GetFileNameWithoutExtension(mainFileName)}-{width}.webp";
+}
 
 public sealed class InvalidImageException : Exception
 {
@@ -59,17 +76,30 @@ public sealed class MediaService(IFileStorage storage, IImageProcessor images, I
                 "Only JPEG, PNG and WebP photos are accepted. On iPhone, set Camera → Formats → Most Compatible.");
 
         ProcessedImage processed;
+        using var original = new MemoryStream();
         try
         {
             using var full = new ConcatenatedStream(header.AsMemory(0, read), content);
-            processed = await images.ProcessAsync(full, cancellationToken);
+            await full.CopyToAsync(original, cancellationToken);
+            original.Position = 0;
+            processed = await images.ProcessAsync(original, cancellationToken);
         }
         catch (InvalidImageException)
         {
             throw new DomainException("unsupported_media_type", "The photo could not be read. Please try another file.");
         }
 
-        var fileName = $"{Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(16))}.{processed.Extension}";
+        var baseName = Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(16));
+        var fileName = $"{baseName}.{processed.Extension}";
+
+        // Variants first, main file last: a URL is only returned once every size exists.
+        foreach (var (width, bytes) in processed.Variants)
+        {
+            using var variant = new MemoryStream(bytes, writable: false);
+            await storage.SaveAsync(variant, ImageVariants.FileName(fileName, width), cancellationToken);
+        }
+        original.Position = 0;
+        await storage.SaveOriginalAsync(original, $"{baseName}.{DetectImageExtension(header.AsSpan(0, read))}", cancellationToken);
         using var output = new MemoryStream(processed.Content, writable: false);
         var url = await storage.SaveAsync(output, fileName, cancellationToken);
 

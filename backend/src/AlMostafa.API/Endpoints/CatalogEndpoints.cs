@@ -1,3 +1,4 @@
+using AlMostafa.API.Common;
 using AlMostafa.Application.Catalog;
 using AlMostafa.Application.Common;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -48,12 +49,18 @@ internal static class CatalogEndpoints
 {
     public static RouteGroupBuilder MapCatalogEndpoints(this RouteGroupBuilder api)
     {
-        var group = api.MapGroup("/fabrics").WithTags("Catalog");
+        var group = api.MapGroup("/fabrics").WithTags("Catalog").CacheOutput(CatalogOutputCache.Policy);
 
-        group.MapGet("/", async Task<Ok<PagedResult<FabricDto>>> ([AsParameters] FabricListQuery query, CatalogService catalog, CancellationToken ct) =>
+        group.MapGet("/", async Task<Ok<PagedResult<FabricSummaryDto>>> ([AsParameters] FabricListQuery query, CatalogService catalog, CancellationToken ct) =>
                 TypedResults.Ok(await catalog.SearchAsync(query.ToCriteria(), ct)))
             .WithName("ListFabrics")
-            .WithSummary("List visible fabrics with filtering, search, sorting and pagination.");
+            .WithSummary("List visible fabrics (card-sized summaries) with filtering, search, sorting and pagination. Also used for search suggestions (pageSize=6).");
+
+        group.MapGet("/{id}/similar", async Task<Ok<IReadOnlyList<FabricSummaryDto>>> (string id, CatalogService catalog, CancellationToken ct, [FromQuery(Name = "limit")] int? limit) =>
+                TypedResults.Ok(await catalog.GetSimilarAsync(id, limit ?? 4, ct)))
+            .WithName("GetSimilarFabrics")
+            .WithSummary("Visible fabrics most like this one (same garment category, then material, colour, pattern).")
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapGet("/facets", async Task<Ok<FabricFacetsDto>> (CatalogService catalog, CancellationToken ct) =>
                 TypedResults.Ok(await catalog.GetFacetsAsync(ct)))

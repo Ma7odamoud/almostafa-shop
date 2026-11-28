@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTheme, useLang } from "@/lib/preferences/preferences";
 import { useCart } from "@/features/cart/cart-context";
 import { t } from "@/lib/i18n";
+import SearchSuggestions from "@/features/catalog/components/SearchSuggestions";
 import {
   ListIcon,
   XIcon,
@@ -469,6 +470,7 @@ export default function Header() {
                 <XIcon size={18} />
               </button>
             </form>
+            <SearchSuggestions query={searchInput} locale={locale} onPick={() => setSearchOpen(false)} />
           </div>
         )}
       </header>

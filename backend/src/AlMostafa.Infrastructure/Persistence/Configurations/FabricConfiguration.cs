@@ -45,8 +45,12 @@ internal sealed class FabricConfiguration : IEntityTypeConfiguration<Fabric>
 
         b.Ignore(f => f.HasPrice);
 
-        b.HasIndex(f => f.Hidden);
+        // Default catalogue order (and admin list). A boolean index on "hidden" is never selective enough to be used.
         b.HasIndex(f => f.CreatedAt);
+
+        // Search: one normalised column + trigram GIN index => ILIKE '%term%' without scanning the table.
+        b.Property(f => f.SearchText).HasMaxLength(SearchText.MaxLength).IsRequired().HasDefaultValue(string.Empty);
+        b.HasIndex(f => f.SearchText).HasMethod("gin").HasOperators("gin_trgm_ops").HasDatabaseName("ix_fabrics_search_text_trgm");
     }
 
     private static void Localized(ComplexPropertyBuilder<LocalizedText> text, string prefix, int maxLength)

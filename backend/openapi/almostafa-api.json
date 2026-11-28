@@ -11,7 +11,7 @@
         "tags": [
           "Catalog"
         ],
-        "summary": "List visible fabrics with filtering, search, sorting and pagination.",
+        "summary": "List visible fabrics (card-sized summaries) with filtering, search, sorting and pagination. Also used for search suggestions (pageSize=6).",
         "operationId": "ListFabrics",
         "parameters": [
           {
@@ -91,7 +91,59 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PagedResultOfFabricDto"
+                  "$ref": "#/components/schemas/PagedResultOfFabricSummaryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/fabrics/{id}/similar": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "Visible fabrics most like this one (same garment category, then material, colour, pattern).",
+        "operationId": "GetSimilarFabrics",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FabricSummaryDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
                 }
               }
             }
@@ -166,8 +218,17 @@
         "tags": [
           "Ordering"
         ],
-        "summary": "Place an order. Prices and totals are computed by the server from the catalogue.",
+        "summary": "Place an order. Prices and totals are computed by the server. Send an Idempotency-Key header (e.g. a UUID per checkout) to make retries safe.",
         "operationId": "PlaceOrder",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -181,6 +242,16 @@
         "responses": {
           "201": {
             "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderConfirmationDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -1193,6 +1264,74 @@
           }
         }
       },
+      "FabricSummaryDto": {
+        "required": [
+          "id",
+          "nameAr",
+          "nameEn",
+          "pricePerMeter",
+          "stockMeters",
+          "color",
+          "colorLabel",
+          "material",
+          "materialLabel",
+          "pattern",
+          "patternLabel",
+          "category",
+          "categoryLabel",
+          "photos"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nameAr": {
+            "type": "string"
+          },
+          "nameEn": {
+            "type": "string"
+          },
+          "pricePerMeter": {
+            "type": "number",
+            "format": "double"
+          },
+          "stockMeters": {
+            "type": "number",
+            "format": "double"
+          },
+          "color": {
+            "type": "string"
+          },
+          "colorLabel": {
+            "$ref": "#/components/schemas/LocalizedTextDto"
+          },
+          "material": {
+            "type": "string"
+          },
+          "materialLabel": {
+            "$ref": "#/components/schemas/LocalizedTextDto"
+          },
+          "pattern": {
+            "type": "string"
+          },
+          "patternLabel": {
+            "$ref": "#/components/schemas/LocalizedTextDto"
+          },
+          "category": {
+            "type": "string"
+          },
+          "categoryLabel": {
+            "$ref": "#/components/schemas/LocalizedTextDto"
+          },
+          "photos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FabricPhotoDto"
+            }
+          }
+        }
+      },
       "FacetOptionDto": {
         "required": [
           "value",
@@ -1439,6 +1578,39 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FabricDto"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PagedResultOfFabricSummaryDto": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FabricSummaryDto"
             }
           },
           "page": {

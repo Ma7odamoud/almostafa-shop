@@ -1,9 +1,9 @@
-// Theme + language preferences, persisted in localStorage (non-sensitive UI state only).
+// Theme + language preferences. Stored in cookies so the server renders the right language, direction
+// and theme on the first response (no blank first paint), and mirrored in localStorage for older visits.
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import type { Locale } from "@/lib/i18n";
-
-type Theme = "dark" | "light";
+import { LOCALE_COOKIE, THEME_COOKIE, type Theme } from "./constants";
 
 interface ThemeCtx { theme: Theme; toggleTheme: () => void }
 const ThemeContext = createContext<ThemeCtx>({ theme: "dark", toggleTheme: () => {} });
@@ -11,41 +11,49 @@ const ThemeContext = createContext<ThemeCtx>({ theme: "dark", toggleTheme: () =>
 interface LangCtx { locale: Locale; toggleLocale: () => void }
 const LangContext = createContext<LangCtx>({ locale: "ar", toggleLocale: () => {} });
 
-const THEME_KEY = "almostafa_theme";
-const LOCALE_KEY = "almostafa_locale";
+function persist(name: string, value: string) {
+  document.cookie = `${name}=${value}; path=/; max-age=31536000; samesite=lax`;
+  try { localStorage.setItem(name, value); } catch { /* storage unavailable */ }
+}
 
-/**
- * Renders children only after the saved preferences are read, so the first paint already uses the
- * visitor's theme, language and text direction (same behaviour as before the refactor).
- */
-export function PreferencesProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [locale, setLocale] = useState<Locale>("ar");
-  const [mounted, setMounted] = useState(false);
+export function PreferencesProvider({
+  children,
+  initialLocale,
+  initialTheme,
+  fromCookie,
+}: {
+  children: React.ReactNode;
+  initialLocale: Locale;
+  initialTheme: Theme;
+  /** False when the visitor has no preference cookie yet (first visit, or saved before cookies were used). */
+  fromCookie: boolean;
+}) {
+  const [theme, setTheme] = useState<Theme>(initialTheme);
+  const [locale, setLocale] = useState<Locale>(initialLocale);
+
+  // One-time migration: preferences saved in localStorage by the previous version become cookies.
+  useEffect(() => {
+    if (fromCookie) return;
+    try {
+      const savedLocale = localStorage.getItem(LOCALE_COOKIE);
+      const savedTheme = localStorage.getItem(THEME_COOKIE);
+      /* eslint-disable react-hooks/set-state-in-effect */
+      if (savedLocale === "ar" || savedLocale === "en") setLocale(savedLocale);
+      if (savedTheme === "dark" || savedTheme === "light") setTheme(savedTheme);
+      /* eslint-enable react-hooks/set-state-in-effect */
+    } catch { /* storage unavailable */ }
+  }, [fromCookie]);
 
   useEffect(() => {
-    // Reading browser-only storage after hydration is the intended use of this effect.
-    /* eslint-disable react-hooks/set-state-in-effect */
-    setTheme((localStorage.getItem(THEME_KEY) as Theme) ?? "dark");
-    setLocale((localStorage.getItem(LOCALE_KEY) as Locale) ?? "ar");
-    setMounted(true);
-    /* eslint-enable react-hooks/set-state-in-effect */
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
     document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem(THEME_KEY, theme);
-  }, [theme, mounted]);
+    persist(THEME_COOKIE, theme);
+  }, [theme]);
 
   useEffect(() => {
-    if (!mounted) return;
     document.documentElement.setAttribute("lang", locale);
     document.documentElement.setAttribute("dir", locale === "ar" ? "rtl" : "ltr");
-    localStorage.setItem(LOCALE_KEY, locale);
-  }, [locale, mounted]);
-
-  if (!mounted) return null;
+    persist(LOCALE_COOKIE, locale);
+  }, [locale]);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme: () => setTheme((t) => (t === "dark" ? "light" : "dark")) }}>

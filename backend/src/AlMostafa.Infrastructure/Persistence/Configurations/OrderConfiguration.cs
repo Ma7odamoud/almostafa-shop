@@ -6,6 +6,8 @@ namespace AlMostafa.Infrastructure.Persistence.Configurations;
 
 internal sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
 {
+    public const string IdempotencyIndex = "ux_orders_idempotency_key";
+
     public void Configure(EntityTypeBuilder<Order> b)
     {
         b.ToTable("orders");
@@ -21,6 +23,8 @@ internal sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         b.Property(o => o.Status).HasConversion<string>().HasMaxLength(32);
         b.Property(o => o.Total).HasPrecision(14, 2);
         b.HasIndex(o => o.CreatedAt);
+        b.Property(o => o.IdempotencyKey).HasMaxLength(Order.MaxIdempotencyKeyLength);
+        b.HasIndex(o => o.IdempotencyKey).IsUnique().HasDatabaseName(IdempotencyIndex).HasFilter("idempotency_key IS NOT NULL");
 
         b.HasMany(o => o.Items)
             .WithOne()
@@ -39,7 +43,6 @@ internal sealed class OrderItemConfiguration : IEntityTypeConfiguration<OrderIte
         b.HasKey(i => i.Id);
         // No FK to fabrics on purpose: an order line is a historical snapshot and must survive fabric deletion.
         b.Property(i => i.FabricId).HasMaxLength(64).IsRequired();
-        b.HasIndex(i => i.FabricId);
         b.ComplexProperty(i => i.FabricName, n =>
         {
             n.Property(t => t.Ar).HasColumnName("fabric_name_ar").HasMaxLength(200).IsRequired();

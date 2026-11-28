@@ -25,9 +25,11 @@ public static class DependencyInjection
     {
         var connectionString = configuration.GetConnectionString("Database") ?? string.Empty;
 
-        services.AddDbContext<AppDbContext>(options => options
+        services.AddSingleton<SlowQueryInterceptor>();
+        services.AddDbContext<AppDbContext>((sp, options) => options
             .UseNpgsql(connectionString, npgsql => npgsql.EnableRetryOnFailure(3))
-            .UseSnakeCaseNamingConvention());
+            .UseSnakeCaseNamingConvention()
+            .AddInterceptors(sp.GetRequiredService<SlowQueryInterceptor>()));
         services.AddScoped<IUnitOfWork>(sp => sp.GetRequiredService<AppDbContext>());
         services.AddScoped<IFabricRepository, FabricRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
@@ -62,6 +64,7 @@ public static class DependencyInjection
             Path.GetFullPath(sp.GetRequiredService<IOptions<StorageOptions>>().Value.UploadsPath, environment.ContentRootPath)));
         services.AddSingleton<IFileStorage, LocalFileStorage>();
         services.AddSingleton<IImageProcessor, SkiaImageProcessor>();
+        services.AddHostedService<ImageVariantBackfill>();
 
         services.Configure<LegacyImportOptions>(configuration.GetSection(LegacyImportOptions.SectionName));
         services.AddScoped<LegacyDataImporter>();

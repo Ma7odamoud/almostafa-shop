@@ -1,6 +1,6 @@
 // Checkout page. Orders are priced by the backend and confirmed by phone before dispatch.
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/preferences/preferences";
 import { useCart } from "@/features/cart/cart-context";
@@ -36,6 +36,8 @@ export default function PaymentPage() {
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  // One key per checkout attempt; kept across retries so a resubmission can never create a second order.
+  const idempotencyKey = useRef<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -96,7 +98,8 @@ export default function PaymentPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate() || submitting) return;
+    idempotencyKey.current ??= crypto.randomUUID();
     setSubmitting(true);
     setSubmitError("");
     try {
@@ -110,7 +113,8 @@ export default function PaymentPage() {
         area,
         address,
         paymentMethod: method,
-      });
+      }, idempotencyKey.current);
+      idempotencyKey.current = null;
       clearCart();
       setConfirmation({ orderId: result.orderId, phone: toAsciiDigits(phone).trim() });
       window.scrollTo({ top: 0 });
